@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+
+{% block content %}
+
+<div class="row">
+  {% for profile in profiles %}
+
+
+
+    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+      <div class="profile_img">
+        <img src="{{ url_for('profile_img', username=profile.username) }}"  
+             class="img-circle profile_img" alt="...">
+      </div>
+      <div class="panel panel-default profile_info">
+        <div class="panel-body">
+          
+          <a href="{{ profile.username }}">{{ profile.username }}</a>
+          {% if loop.first %}
+          text </br>
+          text </br>
+          text </br>
+          text </br>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+
+{% endblock %}

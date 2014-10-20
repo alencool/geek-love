@@ -1,0 +1,88 @@
+
+/* general s*/
+body {
+  padding-top: 100px;
+}
+
+.fullscreen_bg { 
+  background: url(/static/lovebg.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+
+/* navigation s*/
+.glyphicon-heart {color: red}
+
+.navbar-right {
+  padding-right: 30px;
+}
+
+
+.dropdown ul.dropdown-menu {
+    border-radius:4px;
+    margin-top:10px;
+
+}
+.dropdown ul.dropdown-menu:before {
+    content: "";
+    border-bottom: 10px solid #fff;
+    border-right: 10px solid transparent;
+    border-left: 10px solid transparent;
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    z-index: 10;
+}
+
+#custom-nav {
+
+    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.2);
+    z-index:999;
+}
+
+/* profile card s*/
+.profile_img { text-align: center; position: relative;}
+.profile_img { position: relative; z-index: 2; display:block; 
+               margin: auto; width: 70px; height: 70px;
+               line-height: 88px; vertical-align: middle; }
+.profile_info { text-align: center; margin-top: -35px; 
+                margin-right: auto; 
+                margin-left: auto; margin-bottom: 50px; 
+                width: 170px; padding: 25px 0 10px 0; }
+
+
+
+/* clearfix for profile card s*/
+@media (max-width:767px){
+  body {
+    padding: 100px 40px;
+  }
+  .col-lg-2:nth-child(6n+1),
+  .col-md-3:nth-child(4n+1),
+  .col-sm-4:nth-child(3n+1) { clear: none; }
+  .col-xs-6:nth-child(2n+1) { clear: left; }
+}
+
+@media (min-width:768px){
+  .col-xs-6:nth-child(2n+1),
+  .col-lg-2:nth-child(6n+1),
+  .col-md-3:nth-child(4n+1) { clear: none; }
+  .col-sm-4:nth-child(3n+1) { clear: left; }
+}
+
+@media (min-width:992px){
+  .col-xs-6:nth-child(2n+1),
+  .col-lg-2:nth-child(6n+1),
+  .col-sm-4:nth-child(3n+1) { clear: none; }
+  .col-md-3:nth-child(4n+1) { clear: left; }
+}
+
+@media (min-width:1200px) {
+  .col-xs-6:nth-child(2n+1),
+  .col-md-3:nth-child(4n+1),
+  .col-sm-4:nth-child(3n+1) { clear: none; }
+  .col-lg-2:nth-child(6n+1) { clear: left; }
+}

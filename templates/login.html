@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<!--   <h2>Login</h2>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <form action="{{ url_for('login') }}" method=post>
+    <dl>
+      <dt>Username:
+      <dd><input type=text name=username>
+      <dt>Password:
+      <dd><input type=password name=password>
+      <dd><input type=submit value=Login>
+    </dl>
+  </form> -->
+
+  <div class="col-sm-4 pull-right">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h3 class="panel-title">Sign In</h3></div>
+      
+      <div class="panel-body">
+       {% if error %}<p class="bg-danger">{{ error }}</p>{% endif %}
+       <form role="form" action="{{ url_for('login') }}" method=post>
+        <div class="form-group">
+          <input type="text" class="form-control" name="username" placeholder="Username">
+          <input type="password" class="form-control" name="password" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary">Sign in</button>
+         <a href="/forgot_password">(forgot password)</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
