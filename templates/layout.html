@@ -7,8 +7,8 @@
     <title>Home</title>
 
     <!-- Bootstrap -->
-    <link href="static/css/bootstrapPaper.min.css" rel="stylesheet">
-    <link href="static/css/custom.css" rel="stylesheet">
+    <link href="/static/css/bootstrapPaper.min.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
   </head>
   <body class="fullscreen_bg">
 
@@ -49,7 +49,10 @@
               
               <li class="dropdown">
                 
-                <a href="#" class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">Welcome, {{g.user.username}}<span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
+                  Welcome, {{g.user.username}}     
+                  <img src="{{ url_for('profile_img', username=g.user.username) }}" class="img-circle user_img" alt="...">
+                </a>
                 
 
                 <ul class="dropdown-menu" role="menu">
@@ -75,9 +78,9 @@
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="static/js/jquery-2.1.1.min.js"></script>
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="static/js/bootstrap.min.js"></script>
-    <script src="static/js/bootstrap-hover-dropdown.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap-hover-dropdown.min.js"></script>
   </body>
 </html>

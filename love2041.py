@@ -1,5 +1,7 @@
 # all the imports
 import sqlite3, os
+from functools import wraps
+from datetime import date
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 
@@ -30,6 +32,17 @@ def user_dict_factory(cursor, row):
     return d
 
 
+
+
+# def login_required(func):
+#     @wraps(func)
+#     def decorated_function(*args, **kwargs):
+#         if g.user is None:
+#             return redirect(url_for('login', next=request.url))
+#         return f(*args, **kwargs)
+#     return decorated_function
+
+
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
 
@@ -44,6 +57,17 @@ def before_request():
     cur = g.db.execute('select * from users')
     for row in cur.fetchall():
         g.users[row['username']] = row
+
+    # calculate ages
+    today = date.today()
+    for user in g.users.values():
+        year, month, day = user['birthdate'].split('/')
+        year = int(year)
+        month = int(month)
+        day = int(day) 
+        age = today.year - year - ((today.month, today.day) < (month, day))
+        user['age'] = age
+        user['gender'] = user['gender'].capitalize()
 
     # set current user
     g.user = None;
@@ -70,6 +94,25 @@ def home():
     else:
         return render_template('login.html')
 
+@app.route('/page/<int:page_num>')
+def browse(page_num):
+    if g.user:
+        per_page = 12
+        end = per_page * page_num       #slice start
+        start = end - per_page          #slice end
+        profiles = g.users.values()[start:end]
+        num_users = len(g.users)
+        num_pages = num_users/per_page
+
+        next_num = page_num+1 if per_page * page_num < num_users else 0
+        prev_num = page_num-1 if page_num > 1 else 0
+
+        return render_template('browse.html', 
+                                profiles=profiles, 
+                                next_num=next_num, 
+                                prev_num=prev_num)
+    else:
+        return render_template('login.html')
 
 
 
@@ -117,8 +160,6 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('home'))
-
-
 
 @app.route('/profile_img/<username>')
 def profile_img(username):
