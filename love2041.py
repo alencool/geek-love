@@ -17,46 +17,31 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 
-# construct user dictionary
+# sqlite uses this function to construct user dictionary
 def user_dict_factory(cursor, row):
     fields_to_split = ['courses', 'favourite_bands', 'favourite_movies',
                        'favourite_TV_shows', 'favourite_books', 
                        'favourite_hobbies', 'hair_colours']
-    d = {}
+    user = {}
     for idx, col in enumerate(cursor.description):
         value = row[idx] if row[idx] else ''
         if col[0] in fields_to_split:
-            d[col[0]] = value.split('|')
+            user[col[0]] = value.split('|')
         else:
-            d[col[0]] = value
-    return d
+            user[col[0]] = value
+    return user
 
 
-
-
-# def login_required(func):
-#     @wraps(func)
-#     def decorated_function(*args, **kwargs):
-#         if g.user is None:
-#             return redirect(url_for('login', next=request.url))
-#         return f(*args, **kwargs)
-#     return decorated_function
-
-
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
-
-@app.before_request
-def before_request():
-    g.db = connect_db()
+# Set up current user and users if logged in
+def set_up_users():
+    g.db = sqlite3.connect(app.config['DATABASE'])
     g.db.row_factory = user_dict_factory
 
     # construct dictionary of users
     g.users = {}
     cur = g.db.execute('select * from users')
     for row in cur.fetchall():
-        g.users[row['username']] = row
+        g.users[row['username'].lower()] = row
 
     # calculate ages
     today = date.today()
@@ -72,29 +57,39 @@ def before_request():
     # set current user
     g.user = None;
     if session.get('logged_in'):
-
-        username = session.get('username')
+        username = session.get('username').lower()
         password = session.get('password')
         if username in g.users and \
             password == g.users[username]['password']:
             g.user = g.users[username]
+            # users dict should only contain other users
+            del g.users[username]
+
+def login_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        set_up_users()
+        if g.user:
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for('login')) 
+    return decorated_function
 
 
 
+# On teardown exception go home
 @app.teardown_request
 def teardown_request(exception):
     redirect(url_for('home'))
 
-
+# Root should redirect to browse if logged in
 @app.route('/')
 def home():
-    if g.user:
-        profiles = g.users.values()[0:12]
-        return render_template('browse.html', profiles=profiles)
-    else:
-        return render_template('login.html')
+    return redirect(url_for('browse', page_num=1))
 
+# Browse matches
 @app.route('/page/<int:page_num>')
+@login_required
 def browse(page_num):
     if g.user:
         per_page = 12
@@ -133,12 +128,13 @@ def browse(page_num):
 #     flash('New entry was successfully posted')
 #     return redirect(url_for('show_entries'))
 
+# Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-
     if request.method == 'POST':
-        username = request.form['username']
+        set_up_users()
+        username = request.form['username'].lower()
         password = request.form['password']
         if username not in g.users:
             error = 'Invalid username'
@@ -154,17 +150,23 @@ def login():
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
 
+
+# Logout
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('username', None)
+    session.pop('password', None)
     flash('You were logged out')
     return redirect(url_for('home'))
 
+# Return user profile
 @app.route('/profile_img/<username>')
 def profile_img(username):
     # send_static_file will guess the correct MIME type
     path = os.path.join('profile', username, 'profile.jpg')
-    if not os.path.isfile(os.path.join('static', 'profile', username, 'profile.jpg')):
+    if not os.path.isfile(os.path.join('static', 'profile', 
+                                        username, 'profile.jpg')):
         path = 'profile.jpg'
     return app.send_static_file(path)
 
