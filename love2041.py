@@ -3,7 +3,7 @@ import sqlite3, os
 from functools import wraps
 from datetime import date
 from flask import Flask, request, session, g, redirect, url_for, \
-     abort, render_template, flash
+     abort, render_template, flash, jsonify, Response
 
 # configuration
 DATABASE = 'db/users.db'
@@ -154,7 +154,6 @@ def login():
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
 
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
@@ -168,9 +167,13 @@ def profile_img(username):
     if not os.path.isfile(os.path.join('static', 'profile', username, 'profile.jpg')):
         path = 'profile.jpg'
     return app.send_static_file(path)
+
+
+# Render custom.css since it requires urls to static files
+@app.route('/custom')
+def custom_css():
+    return Response(render_template('custom.css'), mimetype='text/css')
     
-
-
 if __name__ == '__main__':
     app.debug = True
     app.run()
