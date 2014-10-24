@@ -1,5 +1,5 @@
 # all the imports
-import sqlite3, os
+import sqlite3, os, re
 from functools import wraps
 from datetime import date
 from flask import Flask, request, session, g, redirect, url_for, \
@@ -87,6 +87,7 @@ def teardown_request(exception):
 def home():
     return redirect(url_for('browse', page_num=1))
 
+
 # Browse matches
 @app.route('/page/<int:page_num>')
 @login_required
@@ -108,8 +109,6 @@ def browse(page_num):
                                 prev_num=prev_num)
     else:
         return render_template('login.html')
-
-
 
 
 # @app.route('/')
@@ -137,9 +136,9 @@ def login():
         username = request.form['username'].lower()
         password = request.form['password']
         if username not in g.users:
-            error = 'Invalid username'
+            error = 'Invalid username or password'
         elif password != g.users[username]['password']:
-            error = 'Invalid password'
+            error = 'Invalid password or password'
         else:
             session['logged_in'] = True
             session['username'] = username
@@ -150,6 +149,57 @@ def login():
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
 
+# Register
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    error = None
+    if request.method == 'POST':
+        pass
+        # set_up_users()
+        # username = request.form['username'].lower()
+        # password = request.form['password']
+        # if username not in g.users:
+        #     error = 'Invalid username'
+        # elif password != g.users[username]['password']:
+        #     error = 'Invalid password'
+        # else:
+        #     session['logged_in'] = True
+        #     session['username'] = username
+        #     session['password'] = password
+
+        #     flash('You were logged in')
+
+        #     return redirect(url_for('home'))
+    else:
+        pass
+
+    return render_template('register.html', error=error)
+
+# Register
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    error = None
+    if request.method == 'POST':
+        pass
+        # set_up_users()
+        # username = request.form['username'].lower()
+        # password = request.form['password']
+        # if username not in g.users:
+        #     error = 'Invalid username'
+        # elif password != g.users[username]['password']:
+        #     error = 'Invalid password'
+        # else:
+        #     session['logged_in'] = True
+        #     session['username'] = username
+        #     session['password'] = password
+
+        #     flash('You were logged in')
+
+        #     return redirect(url_for('home'))
+    else:
+        pass
+
+    return render_template('forgot.html', error=error)
 
 # Logout
 @app.route('/logout')
@@ -169,6 +219,23 @@ def profile_img(username):
                                         username, 'profile.jpg')):
         path = 'profile.jpg'
     return app.send_static_file(path)
+
+
+# Return search results
+@app.route('/search/<term>')
+@login_required
+def search(term):
+    if g.user:
+        per_page = 12
+        profiles = []
+        for profile in g.users.values():
+            if re.search(term, profile['username'], re.IGNORECASE):
+                profiles.append(profile)
+                if len(profiles) == per_page:
+                    break
+        return render_template('results.html', profiles=profiles)
+    else:
+        return render_template('login.html')
 
 
 # Render custom.css since it requires urls to static files

@@ -1,0 +1,39 @@
+{% macro input(name, value='', type='text') -%}
+    <input type="{{ type }}" value="{{ value|e }}" name="{{ name }}">
+{%- endmacro %}
+
+{%- macro textarea(name, value='', rows=10, cols=40) -%}
+    <textarea name="{{ name }}" rows="{{ rows }}" cols="{{ cols
+        }}">{{ value|e }}</textarea>
+{%- endmacro %}
+
+{% macro show_cards(profiles) %}
+    {% for profile in profiles %}
+      <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3 card">
+        <a href="{{ profile.username }}" class="nounderline profile_link">  
+
+          <div class="profile_imgd ">
+                <div class="overlay">
+                   <input type="hidden" value="90" class="dial" 
+                   data-width="80" data-readOnly=true data-linecap=round 
+                   data-bgColor="white" data-fgColor="rgb(150,180,45)" 
+                   data-displayInput=false data-thickness="0.13">
+                 </div>
+            <img src="{{ url_for('profile_img', username=profile.username) }}"  
+                 class="img-circle profile_img" alt="..." >
+                 
+          </div>
+   
+
+          <div class="panel panel-default profile_info">
+            <div class="panel-body">
+              {{ profile.username }}
+              <br>
+              {{profile.age}}, {{profile.gender}}
+            </div>
+
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+{% endmacro %}

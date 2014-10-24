@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+
+  <div class="col-sm-4 col-lg-3 pull-right">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h3 class="panel-title">Forgot Password</h3></div>
+      
+      <div class="panel-body">
+       {% if error %}<p class="bg-danger">{{ error }}</p>{% endif %}
+       <form role="form" action="{{ url_for('reset_password') }}" method=post>
+        
+        <div class="form-group">
+          <input type="text" class="form-control" name="email" placeholder="Email-Address">
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary">Reset</button></br>
+         
+         Already a member?<a href="{{ url_for('login') }}">Login</a></br> 
+         Need an account? <a href="{{ url_for('register') }}">Register</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

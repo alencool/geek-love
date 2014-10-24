@@ -4,17 +4,10 @@ body {
   padding-top: 80px;
 }
 
-.fullscreen_bg { 
-  background: url({{ url_for('static', filename='lovebg.jpg') }}) no-repeat center center fixed; 
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-}
-
-
 /* navigation s*/
 .glyphicon-heart {color: red}
+
+.glyphicon-remove-circle {opacity: 0.5}
 
 .navbar-right {
   padding-right: 30px;
@@ -55,14 +48,18 @@ body {
 }
 
 /* profile card s*/
-.profile_img { text-align: center; position: relative;}
-.profile_img { position: relative; z-index: 2; display:block; 
-               margin: auto; width: 70px; height: 70px;
-               line-height: 88px; vertical-align: middle; }
-.profile_info { text-align: center; margin-top: -35px; 
+.profile_imgd {z-index:10;
+              width: 100px; height: 80px;margin: 0 auto;}
+.profile_img { text-align: center;position: absolute; z-index:10;
+                width: 70px; height: 70px; top: 5px; left:0;right:0; margin: auto;}
+
+.overlay {text-align: center;position: absolute; z-index:1; opacity: 0.6;
+                width: 80px; height: 80px; left:0;right:0; margin: auto;}
+
+.profile_info { text-align: center; margin-top: -40px;
                 margin-right: auto; 
                 margin-left: auto; 
-                width: 170px; padding: 25px 0 10px 0; }
+                width: 170px; padding: 25px 0 10px 0;  }
 
 .pagination_btn { margin: auto; width: 170px; }
 
@@ -70,19 +67,6 @@ body {
   margin-top: 0px;
 }
 
-
-
-/*@media (max-width:767px){
-  .card:nth-child(n+2) {
-    margin-top: 10px;
-  }
-}
-
-@media (min-width:768px){
-  .card:nth-child(n+3) {
-    margin-top: 10px;
-  }
-}*/
 
 @media (min-width:992px){
   .card:nth-child(n+5) {
