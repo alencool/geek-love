@@ -1,5 +1,6 @@
 # all the imports
-import sqlite3, os, re
+import sqlite3, os, re, authenticate
+from authenticate import generate_salt, generate_code, matched_code
 from functools import wraps
 from datetime import date
 from flask import Flask, request, session, g, redirect, url_for, \
@@ -58,9 +59,8 @@ def set_up_users():
     g.user = None;
     if session.get('logged_in'):
         username = session.get('username').lower()
-        password = session.get('password')
-        if username in g.users and \
-            password == g.users[username]['password']:
+        token = session.get('token')
+        if username in g.users and token == g.users[username]['token']:
             g.user = g.users[username]
             # users dict should only contain other users
             del g.users[username]
@@ -74,8 +74,6 @@ def login_required(func):
         else:
             return redirect(url_for('login')) 
     return decorated_function
-
-
 
 # On teardown exception go home
 @app.teardown_request
@@ -127,6 +125,21 @@ def browse(page_num):
 #     flash('New entry was successfully posted')
 #     return redirect(url_for('show_entries'))
 
+# takes a user dict and fields dict then updates db and user dict
+def update_user(user, data):
+    db = sqlite3.connect(app.config['DATABASE'])
+    fields = data.keys()
+    values = [data[key] for key in fields]
+    values.append(user['id'])
+    query = ', '.join([ field + ' = ?' for field in fields])
+    query = 'UPDATE users SET ' + query + ' WHERE id = ?'
+    db.execute(query, values)
+    db.commit()
+    db.close()
+    for key in data:
+        user[key] = data[key]
+
+
 # Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -137,15 +150,14 @@ def login():
         password = request.form['password']
         if username not in g.users:
             error = 'Invalid username or password'
-        elif password != g.users[username]['password']:
+        elif not matched_code(password, g.users[username]['password']):
             error = 'Invalid password or password'
         else:
+            # set a new random token
+            update_user(g.users[username], {'token':generate_salt()})
             session['logged_in'] = True
             session['username'] = username
-            session['password'] = password
-
-            flash('You were logged in')
-
+            session['token'] = g.users[username]['token']
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
 

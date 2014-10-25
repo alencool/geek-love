@@ -1,9 +1,38 @@
-import os,re, sqlite3
+#
+#  built_db.py
+#  Script to scrape data from provide profiles and generate a database.
+#  Also tries to deal with erroneous data.
+#
+#  Created by Alen Bou-Haidar on 17/10/14, edited 25/10/14
+#
 
+import os,re, sqlite3, authenticate
+
+DMY_RE = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/((19|20)\d\d)$'
+YMD_RE = r'^((19|20)\d\d)/(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])$'
+
+
+# return a standardised date in YMD format
+def standardise_birthdate(birthdate):
+    # check if birthdate doesnt match standard format already
+    m = re.match(YMD_RE, birthdate)
+    if not m:
+        m = re.match(DMY_RE, birthdate)
+        if m:
+            # birthdate is in DMY format
+            day, month, year = m.group(1), m.group(2), m.group(3)
+        else:
+            # non valid birthdate, set default
+            day, month, year = '01', '01', '1993'
+        birthdate = year + '/' + month + '/' + day
+    return birthdate
+
+# return a list of immediate subdirectories
 def get_immediate_subdirectories(a_dir):
     return [name for name in os.listdir(a_dir)
             if os.path.isdir(os.path.join(a_dir, name))]
 
+# set up path and users list
 path = os.path.dirname(os.path.realpath(__file__))
 path = os.path.join(path, 'static', 'profile')
 users = get_immediate_subdirectories(path)
@@ -13,7 +42,6 @@ accounts = []       # all 380 user accounts
 for user in users:
     profile_path = os.path.join(path, user, 'profile.txt')
     preference_path = os.path.join(path, user, 'preferences.txt')
-    
 
     category = ''   # outer category name
     field = ''      # field name
@@ -25,7 +53,6 @@ for user in users:
         with open(filename) as F:
             for line in F:
                 m = re.match(r'^\t*(\w+):$', line)
-
                 if m and m.group(1).lower() in ('min', 'max'):
                     field = category + '_' + m.group(1).lower()
                 elif m:
@@ -42,7 +69,13 @@ for user in users:
                     else:
                         account[field] = line.strip()
 
+    # attempt to fix weird birthdates
+    account['birthdate'] = standardise_birthdate(account['birthdate'])
 
+    # code password for security
+    account['password'] = authenticate.generate_code(account['password'])
+
+    # user is obviously active
     account['status'] = 'ACTIVE';
     accounts.append(account)
 
@@ -55,9 +88,10 @@ db.execute('drop table if exists users')
 # Create table
 db.execute('''create table users (
     id   INTEGER PRIMARY KEY,
+    token              TEXT,
     status              TEXT,
-    name                TEXT,
     password            TEXT,
+    name                TEXT,
     courses             TEXT,
     email               TEXT,
     username            TEXT,
@@ -81,14 +115,15 @@ db.execute('''create table users (
     weight_min          REAL,
     weight_max          REAL)''')
 
-
-# Insert a accounts
-for a in accounts:
-    fields = a.keys()
+# Insert accounts
+for account in accounts:
+    fields = account.keys()
     query = 'INSERT INTO users (' + ', '.join(fields) + ') VALUES (' 
     query += ', '.join([ '?' for i in range(len(fields))]) + ')'
-    values = [a[field] for field in fields]
+    values = [account[field] for field in fields]
     db.execute(query, values)
+
+db.execute("UPDATE users SET token = '93743451ee544c4bafc1d2245412f1d9' WHERE id = '200'")
 
 # Save (commit) the changes
 db.commit()
