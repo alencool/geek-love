@@ -14,9 +14,9 @@
 
           <div class="profile_imgd ">
                 <div class="overlay">
-                   <input type="hidden" value="90" class="dial" 
+                   <input type="hidden" value="{{ profile.scaled_score }}" class="dial" 
                    data-width="80" data-readOnly=true data-linecap=round 
-                   data-bgColor="white" data-fgColor="rgb(150,180,45)" 
+                   data-bgColor="white" data-fgColor="{{ profile.colour }}" 
                    data-displayInput=false data-thickness="0.13">
                  </div>
             <img src="{{ url_for('profile_img', username=profile.username) }}"  

@@ -75,6 +75,11 @@ for user in users:
     # code password for security
     account['password'] = authenticate.generate_code(account['password'])
 
+    # for convenience capitilize genders
+    if 'pref_gender' in account:
+        account['pref_gender'] = account['pref_gender'].capitalize()
+    account['gender'] = account['gender'].capitalize()
+
     # user is obviously active
     account['status'] = 'ACTIVE';
     accounts.append(account)
@@ -122,8 +127,6 @@ for account in accounts:
     query += ', '.join([ '?' for i in range(len(fields))]) + ')'
     values = [account[field] for field in fields]
     db.execute(query, values)
-
-db.execute("UPDATE users SET token = '93743451ee544c4bafc1d2245412f1d9' WHERE id = '200'")
 
 # Save (commit) the changes
 db.commit()
