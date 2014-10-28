@@ -1,5 +1,5 @@
 # all the imports
-import sqlite3, os, re, authenticate
+import sqlite3, os, re, smtplib, authenticate
 from authenticate import generate_salt, generate_code, matched_code
 from functools import wraps
 from datetime import date
@@ -54,7 +54,6 @@ class User(object):
 
     # sugar test if field available
     def __contains__(self, key):
-        print key
         return (key in self._data)
 
     # sugar to get a field
@@ -209,8 +208,27 @@ class User(object):
                                         /self.top_score)*100)
                 colour_index = int((user.scaled_score - 0.1)/10)
                 user.colour = self.colours[colour_index]
-                print user.score, user.scaled_score, user.colour
         return users
+
+# send an email to a user
+def send_email(to_addr, subject, body):
+    from_addr = app.config['MAIL_FROM']
+    password =  app.config['MAIL_PASSWORD']
+    server = 'smtp.gmail.com'
+    port = 587
+    session = smtplib.SMTP(server, port)        
+    session.ehlo()
+    session.starttls()
+    session.login(from_addr, password)
+    headers = [
+        "From: " + from_addr,
+        "Subject: " + subject,
+        "To: " + to_addr,
+        "MIME-Version: 1.0",
+        "Content-Type: text/html"]
+    headers = "\n".join(headers)
+    session.sendmail(from_addr, [to_addr], headers + "\n\n" + body)
+    session.quit()
 
 # sqlite uses this function to construct user
 def user_factory(cursor, row):
@@ -318,6 +336,8 @@ def login():
             error = 'Invalid username or password'
         elif not matched_code(password, user.password):
             error = 'Invalid password or password'
+        elif user.status == 'UNVERIFIED':
+            error = 'Please verify your email first.'
         else:
             # set a new random token
             update_user(user, {'token':generate_salt()})
@@ -327,17 +347,105 @@ def login():
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
 
-#TODO
 # Register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    error = None
+    error = {}
+    verify = False
     if request.method == 'POST':
-        pass
-    else:
-        pass
+        # Validate form
+        f = request.form
 
-    return render_template('register.html', error=error)
+        fullname = f['fullname']
+        if not fullname:
+            error['fullname'] = 'You can\'t leave this empty.'
+
+        username = f['username']
+        m = re.match(r'^[a-z0-9]{6,30}$', username, re.IGNORECASE)
+        if not username:
+            error['username'] = 'You can\'t leave this empty.'
+        elif len(username) < 6 or len(username) > 30:
+            error['username'] = 'Please use between 6 and 30 characters.'
+        elif not m:
+            error['username'] = 'Only letters and numbers allowed.'
+        elif get_user(username):
+            error['username'] = 'Username taken.'
+
+        password = f['password']
+        if not password:
+            error['password'] = 'You can\'t leave this empty.'
+        elif len(password) < 8:
+            error['password'] = 'Use at least 8 characters'
+
+        birthday = f['birthday']
+        DMY_RE = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/((19|20)\d\d)$'
+        m = re.match(DMY_RE, birthday)
+        if not birthday:
+            error['birthday'] = 'You can\'t leave this empty.'
+        elif not m:
+            error['birthday'] = 'Please provide a valid date'
+        else:
+            # date is valid, extract date data
+            day, month, year = m.group(1), m.group(2), m.group(3)
+            birthdate = year + '/' + month + '/' + day
+
+        email = f['email']
+        EMAIL_RE = r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$'
+        m = re.match(EMAIL_RE, email, re.IGNORECASE)
+        if not email:
+            error['email'] = 'You can\'t leave this empty.'
+        elif not m:
+            error['email'] = 'Please provide a valid email.'
+
+        gender = request.form.get('gender', '')
+        if not gender:
+            error['gender'] = 'Please select a gender.'
+
+        # Create account if all checks out :D!
+        if not error:
+            verify = True
+
+            # Define the new account
+            token = generate_salt() #random token used in verification
+            account = {}
+            account['status']       = 'UNVERIFIED'
+            account['token']        = token
+            account['password']     = generate_code(password)
+            account['name']         = fullname
+            account['email']        = email
+            account['username']     = username
+            account['gender']       = gender
+            account['birthdate']    = birthdate
+            account['pref_gender']  = 'Female' if gender == 'Male' else 'Male'          
+
+            # Add account to db
+            db = sqlite3.connect(app.config['DATABASE'])
+            fields = account.keys()
+            query = 'INSERT INTO users (' + ', '.join(fields) + ') VALUES (' 
+            query += ', '.join([ '?' for i in range(len(fields))]) + ')'
+            values = [account[field] for field in fields]
+            db.execute(query, values)
+            db.commit()
+            db.close()
+
+            # Send verification email
+            subject = 'Confirm your Geek Love account'
+            url = url_for('verify', username=username, token=token, _external=True)
+            body = render_template('confirm.html', account=account, url=url)
+            send_email(email, subject, body)
+
+    return render_template('register.html', error=error, verify=verify)
+
+# Verify a users new account
+@app.route('/verify/<username>/<token>')
+def verify(username, token):
+    user = get_user(username)
+    if user and user.token == token:
+        update_user(user, {'status':'Active'})
+        return render_template('verify.html', user=user)
+    else:
+        return redirect(url_for('home'))
+
 
 #TODO
 # Reset Password
@@ -347,7 +455,7 @@ def forgot_password():
     if request.method == 'POST':
         pass
     else:
-        pass
+        return redirect(url_for('home'))
 
     return render_template('forgot.html', error=error)
 
@@ -369,23 +477,53 @@ def profile_img(username):
         path = 'profile.jpg'
     return app.send_static_file(path)
 
+# Return inner html for profile
+@app.route('/profile/<username>')
+@login_required
+def profile(username):
+    profile = get_user(username)
+    if profile:
+        return render_template('profile.html', profile=profile)
+    else:
+        redirect(url_for('home'))
+
+
+# quote
+#     <i>Italic</i>, <b>Bold</b> and <u>Underline</u> supported.
+# Appearance
+# height
+# weight
+# hair_colour
+
+# Degree 
+
+
+# Favourite bands
+
+# Favourite movies
+
+# Favourite TV shows
+
+# Favourite books
+
+# Favourite hobbies
+
+
 
 # Return search results
 @app.route('/search/<term>')
 @login_required
 def search(term):
-    if g.user:
-        per_page = 12
-        profiles = []
-        matches = get_matches()
-        for profile in matches:
-            if re.search(term, profile.username, re.IGNORECASE):
-                profiles.append(profile)
-                if len(profiles) == per_page:
-                    break
-        return render_template('results.html', profiles=profiles)
-    else:
-        return render_template('login.html')
+    per_page = 12
+    profiles = []
+    matches = get_matches()
+    for profile in matches:
+        if re.search(term, profile.username, re.IGNORECASE):
+            profiles.append(profile)
+            if len(profiles) == per_page:
+                break
+    return render_template('results.html', profiles=profiles)
+
     
 if __name__ == '__main__':
     app.debug = True

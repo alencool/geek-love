@@ -4,6 +4,14 @@ body {
   padding-top: 80px;
 }
 
+
+/* forms */
+.help-block {margin:0 !important;}
+div.has-error {margin-bottom: 0px !important;}
+/*div.nopad {padding: 0px !important;}*/
+label {padding: 5px 0px 0px 0px !important; }
+
+
 /* navigation s*/
 .glyphicon-heart {color: red}
 
@@ -89,9 +97,48 @@ body {
 .card:hover .profile_info {
   background:rgba(255,255,255,1);
 }
-.nounderline {
+
+
+a {
   text-decoration: none !important; 
-  outline: none !important; -moz-user-focus: ignore !important;}
+  outline: none !important; -moz-user-focus: ignore !important;
+}
+
+
+
+/*** Modal for profiles ****/
+.modal-header { padding-bottom: 0px;}
+.modal-body { padding-top: 0px;}
+
+.modal-header textarea {
+    resize: none;
+    margin-top: 5px;
+}
+
+.modal-header img {
+    width: 120px;
+    height: 120px;
+    margin-right: 10px;
+}
+
+.mhc-outer {
+  display: table;
+}
+
+.mhc-inner {
+  display: table-cell;
+  vertical-align: middle;
+  margin-left: 10px;
+  text-align: left !important;
+}
+
+.btn-msg {
+position: absolute;
+padding-right: 30px;
+right:  0px;
+bottom: 0px;
+}
+
 
 
 /* clearfix for profile card s*/
@@ -103,6 +150,7 @@ body {
   .col-md-3:nth-child(4n+1),
   .col-sm-4:nth-child(3n+1) { clear: none; }
   .col-xs-6:nth-child(2n+1) { clear: left; }
+  .modal-dialog { width:95%; margin: auto}
 }
 
 @media (min-width:768px){
@@ -110,6 +158,7 @@ body {
   .col-lg-3:nth-child(4n+1),
   .col-md-3:nth-child(4n+1) { clear: none; }
   .col-sm-4:nth-child(3n+1) { clear: left; }
+  .modal-dialog { width:95%;}
 }
 
 @media (min-width:992px){
@@ -117,6 +166,7 @@ body {
   .col-lg-3:nth-child(4n+1),
   .col-sm-4:nth-child(3n+1) { clear: none; }
   .col-md-3:nth-child(4n+1) { clear: left; }
+  .modal-dialog { width:85%;}
 }
 
 @media (min-width:1200px) {
@@ -124,4 +174,5 @@ body {
   .col-md-3:nth-child(4n+1),
   .col-sm-4:nth-child(3n+1) { clear: none; }
   .col-lg-3:nth-child(4n+1) { clear: left; }
+  .modal-dialog { width:1020px;}
 }

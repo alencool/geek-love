@@ -76,19 +76,10 @@
 
 <!-- Modal -->
 <div class="modal fade" id="profile_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog  modal-lg">
+  <div class="modal-dialog ">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+      
+
     </div>
   </div>
 </div>
@@ -97,20 +88,11 @@
 {% block script %}
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   
-  // setup cards and what nots
+  // Connect all the components events
   function setUp() {
+      // knobify inputs
       $(".dial").knob();
-      $('body').on('click', 'a.profile_link', function(event){
-        $("#profile_modal").modal('show');
-        event.preventDefault();
-      });
-  }
-
-  $(function() {
-      // set rank dials
-      setUp();
       
-
       // make search clearable
       $(".clearer").hide();
       $(".clearer").click(function () {
@@ -119,6 +101,46 @@
           $(this).hide();
       });
 
+
+      // set up bootstraps tab switching
+      $('body').on('click', '#tab a', function(event){
+        $(this).tab('show');
+        event.preventDefault();
+      });
+
+      $('body').on('click', 'a.profile_link', function(event){
+        // load user profile into modal and show
+        event.preventDefault();
+        var username = $(this).data("username")
+
+        $('#profile_modal .modal-content').load($SCRIPT_ROOT + '/profile/' + username, function() {
+
+          // on tab shown trigger masonary
+          $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            
+            $('.isotope').isotope({
+              itemSelector: '.thumbs',
+              transitionDuration: 0,
+              masonry: {
+                columnWidth: '.thumbs'
+              }
+
+            })
+          })
+
+          // show modal and switch to first time
+          // this is nessasary to get masonary working properly
+          $("#profile_modal").modal('show');
+          $("#tab a:first").tab('show');
+
+        });
+
+      });
+
+  }
+
+  $(function() {
+      setUp();
   });
   
   $("#search").bind("paste keyup", function() {
@@ -126,8 +148,8 @@
       
       $('#matches').hide();
       $('#results').load($SCRIPT_ROOT + '/search/' + $(this).val(), function() {
+          // re-knobify on new content
           $(".dial").knob();
-          
       });
       $('#results').show();
       $(".clearer").show();

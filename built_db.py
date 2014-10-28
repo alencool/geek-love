@@ -23,7 +23,7 @@ def standardise_birthdate(birthdate):
             day, month, year = m.group(1), m.group(2), m.group(3)
         else:
             # non valid birthdate, set default
-            day, month, year = '01', '01', '1993'
+            day, month, year = '01', '01', '1914'
         birthdate = year + '/' + month + '/' + day
     return birthdate
 
@@ -100,6 +100,7 @@ db.execute('''create table users (
     courses             TEXT,
     email               TEXT,
     username            TEXT,
+    quote               TEXT,
     height              REAL,
     gender              TEXT,
     favourite_bands     TEXT,

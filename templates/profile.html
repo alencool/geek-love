@@ -1,25 +1,140 @@
-<ul id="tab" class="nav nav-tabs">
-  <li class="active"><a href="#about" data-toggle="tab">About</a></li>
-  <li class=""><a href="#photos" data-toggle="tab">Photos</a></li>
-  <li class=""><a href="#stats" data-toggle="tab">Score</a></li>
-</ul>
- 
-<div id="tab_content" class="tab-content">
-  <div class="tab-pane fade active in" id="about">
-    
-    <p>content</p>
+
+
+
+
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+  <div class="row">
+  
+    <div class="col-xs-7  col-sm-6 col-md-5 col-lg-5" >
+      
+      <div class="mhc-outer">
+        <img src="{{ url_for('profile_img', username=profile.username) }}"  class="img-circle m-profile_img " alt="..." >
+        <span class="mhc-inner" >
+          
+          <h5>{{ profile.username }}</h5>
+          <p> {{profile.age}}, {{profile.gender}}</p>
+          
+        </span>
+      </div>
+
+    </div>
+
+    <div class="col-xs-5 col-sm-6 col-md-7 col-lg-7 ">
+      <div>
+        <form accept-charset="UTF-8" action="" method="POST">
+          
+          <textarea class="col-xs-9" id="new_message" name="new_message"
+          placeholder="Write a quick message..." rows="3"></textarea>
+          <div class="btn-msg">
+            <button class="btn" type="submit">Send</button>
+            
+          </div>
+          
+        </form>
+      </div>
+    </div>
+
   
 
 
   </div>
-  <div class="tab-pane fade" id="photos">
+
+<div class="modal-body">
+  <!-- modal content start -->
+  <ul id="tab" class="nav nav-tabs">
+    <li class=""><a href="#about" data-toggle="tab">About</a></li>
+    <li class="active"><a href="#photos" data-toggle="tab">Photos</a></li>
+    <li class=""><a href="#stats" data-toggle="tab">Score</a></li>
+  </ul>
+   
+  <div id="tab_content" class="tab-content">
+    <div class="tab-pane fade active in" id="about">
+
     
-    <p>content</p>
+        <div class="col-md-12 col-sm-12">
+            <div class="container-fluid">
+                <div class="isotope">
+                    <div class="thumbs col-md-3 col-sm-6">
+                        <div class="thumbnail">
+                            1<br />
+                            text<br />
+                        </div>
+                    </div>
+                    <div class="thumbs col-md-3 col-sm-6">
+                        <div class="thumbnail">
+                            2<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                        </div>
+                    </div>
+                    <div class="thumbs col-md-3 col-sm-6">
+                        <div class="thumbnail">
+                            3<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                        </div>
+                    </div>
+          
+                    <div class="thumbs col-md-3 col-sm-6">
+                        <div class="thumbnail">
+                            7<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                        </div>
+                    </div>
+                    <div class="thumbs col-md-3 col-sm-6">
+                        <div class="thumbnail">
+                            8<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                            text<br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      
+
+
+    </div>
+    <div class="tab-pane fade" id="photos">
+
+      
+
+    </div>
+    <div class="tab-pane fade" id="stats">
+      <p>content</p>
+    
+    </div>
 
   </div>
-  <div class="tab-pane fade" id="stats">
-    <p>content</p>
-  
-  </div>
+  <!-- modal content end -->
 
 </div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>
+
+
+
+
+
+
+
+
+
+

@@ -1,30 +1,59 @@
 {% extends "layout.html" %}
-
+{% from 'macros.html' import input, select %}
 {% block nav %}
 {% endblock %}
 
 {% block content %}
 
-  <div class="col-sm-4 pull-right">
+  <div class="col-lg-4 col-md-5 col-sm-7 col-xs-9 pull-right">
     <div class="panel panel-default">
-      <div class="panel-heading"><h3 class="panel-title">Register a new account</h3></div>
-      
       <div class="panel-body">
-       {% if error %}<p class="bg-danger">{{ error }}</p>{% endif %}
-       <form role="form" action="{{ url_for('register') }}" method=post>
-        <div class="form-group">
-          <input type="text" class="form-control" name="username" placeholder="Username">
-          <input type="password" class="form-control" name="password" placeholder="Password">
-        </div>
+        
+        {% if verify %}
+          <p>We've Sent you an confirmation email. 
+          Verify your account by clicking the link in the email. <p>
 
-        <div style="text-align: center;">
-          <button type="submit" class="btn btn-sm btn-primary">Register</button></br></br>
-          <a href="{{ url_for('forgot_password') }}">Forgot password?</a></br>
-          Already have an account? <a href="{{ url_for('login') }}">Login</a>
-        </div>
+        {% else %}  
 
-      </form>
+          <legend>Register a new account</legend>
+          <form class="form-horizontal" role="form" action="{{ url_for('register') }}" method=post>
+            <fieldset>
+              
+
+              {% set f = {} %}
+              {% if request is defined %}
+              {% set f = request.form %}
+              {% endif %}
+              {{ input('fullname', 'Full name', error.fullname, f.fullname) }}
+              {{ input('username', 'Username', error.username, f.username) }}
+              {{ input('password', 'Password', error.password, f.password, type='password') }}
+
+              {{ input('birthday', 'Birthday', error.birthday, f.birthday, placeholder='dd/mm/yyyy') }}
+
+              {{ input('email', 'Email', error.email, f.email, type='email') }}
+
+              {{ select('gender', 'Gender', error.gender, values=['Male', 'Female'], selected=f.gender, placeholder='I am...') }}
+
+              <div class="form-group">
+                <div class="col-xs-8 col-xs-offset-4">
+                  
+                  <button type="submit" class="btn btn-primary" style="-webkit-user-select: auto;">Register</button>
+                  </br></br>
+                  <a href="{{ url_for('forgot_password') }}">Forgot password?</a></br>
+                  Already have an account? <a href="{{ url_for('login') }}">Login</a>
+                </div>
+              </div>
+
+            </fieldset>
+          </form>
+        {% endif %}
+
+
+
+
     </div>
   </div>
+</div>
+      
 {% endblock %}
 
