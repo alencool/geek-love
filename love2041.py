@@ -21,6 +21,12 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 
+# return age
+def calcaulte_age(birthday):
+    today = date.today()
+    day, month, year = [int(num) for num in birthday.split('/')]
+    return today.year - year - ((today.month, today.day) < (month, day))
+
 # Abstract view of a user
 class User(object):
     fields_to_split = ['courses', 'favourite_bands', 'favourite_movies',
@@ -53,9 +59,8 @@ class User(object):
                 else:
                     data[key] = []
         # set up age
-        today = date.today()
-        day , month, year = [int(num) for num in self.birthday.split('/')]
-        self.age = today.year - year - ((today.month, today.day) < (month, day))
+        self.age = calcaulte_age(self.birthday)
+
 
 
     # sugar test if field available
@@ -311,12 +316,23 @@ def validate_password(password, error):
 
 
 def validate_birthday(birthday, error):
-    DMY_RE = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/((19|20)\d\d)$'
+    DMY_RE = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/(\d\d\d\d)$'
     m = re.match(DMY_RE, birthday)
     if not birthday:
         error['birthday'] = 'You can\'t leave this empty.'
     elif not m:
         error['birthday'] = 'Please provide a valid date'
+    else:
+        age = calcaulte_age(birthday)
+        if age < 0:
+            error['birthday'] = 'Are you from the future?'
+        elif age < 14:
+            error['birthday'] = 'Go play outside you crazy kid.'
+        elif age > 500:
+            error['birthday'] = 'A wild pokemon has appeared o_O'
+        elif age > 120:
+            error['birthday'] = 'Turtles dont usually date.'
+
 
 def validate_email(email, error):
     EMAIL_RE = r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$'
@@ -381,7 +397,7 @@ def home():
 # Browse matches
 @app.route('/page/<int:page_num>')
 @login_required
-def browse(page_num):
+def browse(page_num, msg_username=''):
     matches = get_matches()
     
     per_page = 12
@@ -398,7 +414,8 @@ def browse(page_num):
     return render_template('browse.html', 
                             profiles=profiles, 
                             next_num=next_num, 
-                            prev_num=prev_num)
+                            prev_num=prev_num,
+                            msg_username=msg_username)
 
 
 # takes a user dict and fields dict then updates db and user dict
@@ -507,7 +524,7 @@ def register():
 def verify(username, token):
     user = get_user(username)
     if user and user.token == token:
-        update_user(user, {'status':'Active'})
+        update_user(user, {'status':'ACTIVE'})
         return render_template('verify.html', user=user)
     else:
         return redirect(url_for('home'))
@@ -637,6 +654,32 @@ def profile(username):
         return render_template('profile.html', profile=profile, favs=favs)
     else:
         redirect(url_for('home'))
+
+
+@app.route('/msg/<username>', methods=["GET","POST"])
+@login_required
+def open_profile(username):
+    return browse(page_num=1, msg_username=username)
+
+@app.route('/msg_user', methods=["GET","POST"])
+@login_required
+def msg_user():
+    if request.method == 'POST':
+        recipient = request.form['recipient']        
+        msg = request.form['msg']
+        user = get_user(recipient)
+        if user:
+            email = user.email
+            subject = 'Geek Love new message!'
+            url =  url_for('open_profile', username=g.user.username, _external=True)
+
+            body = render_template('msgEmail.html', from_user = g.user, to_user=user, url=url, msg=msg)
+            send_email(email, subject, body)
+
+    return '<em>message sent</em>'
+
+
+
 
 # Return inner html for profile photos
 @app.route('/photos/<username>')

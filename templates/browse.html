@@ -97,6 +97,10 @@
   </div>
 </div>
 
+{% if msg_username %}
+  <div style="display:none;">
+    <a href="#" data-username="{{ msg_username }}" class="profile_link" id="msg_username">  0o0o secret </a>
+  </div> 
+{% endif %}
+
 {% endblock %}
-
-

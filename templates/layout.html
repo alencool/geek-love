@@ -57,9 +57,8 @@
       </div>
     </div>
 
-    <script> $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; 
-
-
+    <script> 
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
     <!--    
         ==================== Opensource js libriaries ==================
@@ -81,7 +80,7 @@
     
     <!-- my custom script to connect everything up -->
     <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
-  
+
 
   </body>
 </html>

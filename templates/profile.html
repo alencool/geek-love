@@ -22,13 +22,12 @@
 
     <div class="col-xs-5 col-sm-6 col-md-7 col-lg-7 ">
       <div>
-        <form accept-charset="UTF-8" action="" method="POST">
-
-          <textarea class="col-xs-9" id="new_message" name="new_message"
+        <form accept-charset="UTF-8" id="form_send_msg">
+          <input type="hidden" name="recipient" value="{{ profile.username }}">
+          <textarea class="col-xs-9" id="msg" name="msg"
           placeholder="Write a quick message..." rows="3"></textarea>
           <div class="btn-msg">
-            <button class="btn" type="submit">Send</button>
-            
+            <button class="btn" id="btn_send_msg">Send</button>
           </div>
           
         </form>

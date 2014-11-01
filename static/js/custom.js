@@ -22,6 +22,8 @@
 // Connect all the components events
 function setUp() {
     
+    /////////////////////// VISUAL ///////////////////////
+
     // custom scrollbar for main body
     $('body >div').mCustomScrollbar({
         theme:"minimal",
@@ -29,6 +31,28 @@ function setUp() {
           enable:true
         }
     });
+
+    // update scroll content on resize
+    $(window).on('resize', function() {
+        $("#tab_content").mCustomScrollbar("update");
+    });
+
+
+    $('.modal').on('shown.bs.modal', function (e) {
+        $("#tab_content").mCustomScrollbar({
+            theme:"minimal-dark",
+            updateOnContentResize: false,
+        });
+    });
+
+    // knobify inputs
+    $(".dial").knob();
+
+    // set up nicer looking select for firefox, dam you firefox
+    $('.selectpicker').selectpicker({});
+    
+
+    /////////////////////// SEARCH ///////////////////////
 
     // set up dynamic search
     $("#search").bind("paste keyup", function() {
@@ -57,26 +81,7 @@ function setUp() {
         $(this).hide();
     });
 
-
-    
-    // set up nicer looking select for firefox, dam you firefox
-    $('.selectpicker').selectpicker({});
-    
-    // update scroll content on resize
-    $(window).on('resize', function() {
-        $("#tab_content").mCustomScrollbar("update");
-    });
-
-
-    $('.modal').on('shown.bs.modal', function (e) {
-        $("#tab_content").mCustomScrollbar({
-            theme:"minimal-dark",
-            updateOnContentResize: false,
-        });
-    });
-    
-    // knobify inputs
-    $(".dial").knob();
+    /////////////////////// MODAL ///////////////////////
     
     // set up bootstraps tab switching
     $('body').on('click', '#tab a', function(event){
@@ -87,7 +92,27 @@ function setUp() {
 
 
 
-    ////////////////////////new text field///////////////////////
+    ////////////////////// FORMS ///////////////////////
+
+    // send a user a message
+    $('#profile_modal').on('submit', '#form_send_msg', function(event) {
+        console.log('sending a message');
+        event.preventDefault(); 
+        var formData = $('#form_send_msg').serialize();
+        $.ajax({
+            url: $SCRIPT_ROOT + '/msg_user',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            dataType: 'json',
+            success: function(data, textStatus, jqXHR) {
+                console.log('sent a message');
+            }
+        });
+        $('#msg').val('');
+    });
+
+
 
     // for the last input of extendable fields, increment on new text
     $('body').on('keypress', '.extendable', function(event){
@@ -115,7 +140,7 @@ function setUp() {
     });
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
     
 
     // generates event handler for uploading files
@@ -205,7 +230,7 @@ function setUp() {
         
     });
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////// USER CARDS //////////////////////////////
 
     
     // connect up card to profile modal link
@@ -244,13 +269,14 @@ function setUp() {
         
     });
 
+    ////////////////////// OVERLAYS ///////////////////////
+
     // connect up hover overlays
     $('body').on('mouseenter','.overlay-parent',
         function(){
             console.log('what up doc');
             $(this).find('.top-overlay').fadeIn(250);
             $(this).find('.bottom-overlay').fadeIn(250);
-
         }
     );
     $('body').on('mouseleave','.overlay-parent',
@@ -261,6 +287,18 @@ function setUp() {
         }
     ); 
 
+    ////////////////////// MESSAGE ///////////////////////
+
+    // if we are to msg a user launch the profile modal
+    if ($("#msg_username").length){
+        // focus on the textarea only once
+        $('#profile_modal').one('shown.bs.modal', function (e) {
+            $("#msg").focus();
+        });
+        $('#msg_username')[0].click();
+
+    }
+   
 }
 
 $(function() {
