@@ -17,8 +17,13 @@
 
     <!-- Bootstrap -->
     <link href="{{ url_for('static', filename='css/bootstrapPaper.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap-select.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/jquery.mCustomScrollbar.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+
+
+
   </head>
   <body class="fullscreen_bg">
 
@@ -52,17 +57,31 @@
       </div>
     </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script> $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; 
+
+
+    </script>
+    <!--    
+        ==================== Opensource js libriaries ==================
+        jquery,    (js framework)
+        jquery-lionbars (custom scrollbars look like osx)
+        bootstrap, (css framework)
+        bootstrap-hover-dropdoan, (menu activate on hover)
+        bootstrap-select, (for a nicer looking dropdown in firefox)
+        isotope, (layout manager, used for dynamic masonary)
+        jquery-knob, (circular progress bar using canvas)
+    -->
     <script src="{{ url_for('static', filename='js/jquery-2.1.1.min.js') }}"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{{ url_for('static', filename='js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap-hover-dropdown.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap-select.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery.knob.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/isotope.pkgd.min.js') }}"></script>
-    <script>
-      {% block script %}
-      {% endblock %}
-    </script>
+    
+    <!-- my custom script to connect everything up -->
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+  
 
   </body>
 </html>

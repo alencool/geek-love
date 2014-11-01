@@ -30,7 +30,7 @@
 
               {{ input('birthday', 'Birthday', error.birthday, f.birthday, placeholder='dd/mm/yyyy') }}
 
-              {{ input('email', 'Email', error.email, f.email, type='email') }}
+              {{ input('email', 'Email', error.email, f.email) }}
 
               {{ select('gender', 'Gender', error.gender, values=['Male', 'Female'], selected=f.gender, placeholder='I am...') }}
 

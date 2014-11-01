@@ -1,0 +1,29 @@
+{% from 'macros.html' import input, select %}
+<div class="col-lg-4 col-md-4 col-sm-6 col-xs-7">
+    
+    <form class="form-horizontal" role="form" >
+    <fieldset>
+      
+
+          {% set f = me %}
+          {% if request.post is defined %}
+
+          {% set f = request.form %}
+          {% endif %}
+
+          {{ input('name', 'name', error.name, f.name) }}
+          {{ input('birthday', 'Birthday', error.birthday, f.birthday, placeholder='dd/mm/yyyy') }}
+          {{ select('gender', 'Gender', error.gender, values=['Male', 'Female'], selected=f.gender, placeholder='I am...') }}
+
+
+    </fieldset>
+    </form>
+
+
+</div>
+
+
+
+
+
+

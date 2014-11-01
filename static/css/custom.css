@@ -1,16 +1,46 @@
 
 /* general s*/
-body {
-  padding-top: 80px;
+
+
+body > div {
+  padding-top: 65px;
+  height: 100vh;
+  overflow: hidden;
 }
 
+#tab_content {height:auto; max-height: calc(100vh - 290px); overflow:hidden;};
+
+
+/* odd firefox bolding issues fix*/
+label { font-weight: bold;}
+@-moz-document url-prefix() {
+  label { font-weight: 500 !important;}
+
+}
+
+/* allow red helper class to show under*/
+.selectpicker {
+  margin-bottom: 5px; padding-bottom: 5px;
+}
+  
+
+.photo-item { padding: 5px !important;}
 
 /* forms */
 .help-block {margin:0 !important;}
 div.has-error {margin-bottom: 0px !important;}
-/*div.nopad {padding: 0px !important;}*/
-label {padding: 5px 0px 0px 0px !important; }
 
+
+.selectpicker{background-image: none !important;line-height: 1.2 !important;}
+.selectpicker,
+.selectpicker:hover, 
+.selectpicker:active, 
+.selectpicker:focus {background-color: white !important;}
+
+.nopad {padding: 0px !important;}
+label {padding: 5px 0px 0px 0px !important; text-align: right;}
+.modal .form-control {font-size: 14px;}
+#tab_content .form-group {margin: 0px;}
 
 /* navigation s*/
 .glyphicon-heart {color: red}
@@ -25,13 +55,22 @@ label {padding: 5px 0px 0px 0px !important; }
   display: inline;
   height: 40px;
   width: 40px;
-  margin-left: 10px;
+  margin: 5px;
 }
 
 .navbar-nav > li > a {
-    padding: 10px;
+    padding: 0px;
     margin-right: 0px;
 }
+
+.navbar-brand, .navbar-form {
+  padding-bottom: 0px;
+  padding-top: 5px;
+  margin: 0px;
+  line-height: 1;
+  height: auto;
+}
+.navbar-brand {padding-top: 10px;padding-bottom: 12px;}
 
 .dropdown ul.dropdown-menu {
     border-radius:4px;
@@ -45,7 +84,7 @@ label {padding: 5px 0px 0px 0px !important; }
     border-left: 10px solid transparent;
     position: absolute;
     top: -10px;
-    right: 19px;
+    right: 15px;
     z-index: 10;
 }
 
@@ -70,6 +109,8 @@ label {padding: 5px 0px 0px 0px !important; }
                 width: 170px; padding: 25px 0 10px 0;  }
 
 .pagination_btn { margin: auto; width: 170px; }
+
+.pager {margin-bottom: 0px !important;}
 
 .card {
   margin-top: 0px;
@@ -107,12 +148,22 @@ a {
 
 
 /*** Modal for profiles ****/
+.modal-dialog {margin-bottom: 0px; margin-top: 20px;}
+.modal-open  { overflow: inherit !important;;
+                padding-right: 0 !important;}
+
 .modal-header { padding-bottom: 0px;}
-.modal-body { padding-top: 0px;}
+.modal-body { padding-top: 0px;
+              padding-bottom: 0px;}
 
 .modal-header textarea {
     resize: none;
     margin-top: 5px;
+}
+
+.tab-content {
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .modal-header img {
@@ -134,12 +185,28 @@ a {
 
 .btn-msg {
 position: absolute;
-padding-right: 30px;
+padding-right: 15px;
 right:  0px;
 bottom: 0px;
 }
 
+/* Current users profile */
+.bottom-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: none;
+    text-align:center;
+}
 
+/* Current users profile */
+.top-overlay {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    display: none;
+    text-align:center;
+}
 
 /* clearfix for profile card s*/
 @media (max-width:767px){

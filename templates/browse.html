@@ -25,8 +25,10 @@
       
 
       <ul class="dropdown-menu" role="menu">
-        <li><a href="#"><span class="glyphicon glyphicon-user"></span> About me</a></li>
-        <li><a href="#"><span class="glyphicon glyphicon-picture"></span> Photos</a></li>
+        <li><a href="#"  id="aboutmelink"><span class="glyphicon glyphicon-user"></span> About me</a></li>
+        
+
+
         <li><a href="#"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
         <li class="divider"></li>
         <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-off"></span> Logout</a></li>
@@ -74,7 +76,7 @@
 <div id="results">
 </div>
 
-<!-- Modal -->
+<!-- Modal Selected user profile -->
 <div class="modal fade" id="profile_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog ">
     <div class="modal-content">
@@ -83,83 +85,18 @@
     </div>
   </div>
 </div>
+
+
+<!-- Modal Selected user profile -->
+<div class="modal fade" id="myphotos_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      
+
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
-{% block script %}
-  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  
-  // Connect all the components events
-  function setUp() {
-      // knobify inputs
-      $(".dial").knob();
-      
-      // make search clearable
-      $(".clearer").hide();
-      $(".clearer").click(function () {
-          $(this).prev('input').val('').focus();
-          $(this).prev('input').keyup();
-          $(this).hide();
-      });
-
-
-      // set up bootstraps tab switching
-      $('body').on('click', '#tab a', function(event){
-        $(this).tab('show');
-        event.preventDefault();
-      });
-
-      $('body').on('click', 'a.profile_link', function(event){
-        // load user profile into modal and show
-        event.preventDefault();
-        var username = $(this).data("username")
-
-        $('#profile_modal .modal-content').load($SCRIPT_ROOT + '/profile/' + username, function() {
-
-          // on tab shown trigger masonary
-          $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-            
-            $('.isotope').isotope({
-              itemSelector: '.thumbs',
-              transitionDuration: 0,
-              masonry: {
-                columnWidth: '.thumbs'
-              }
-
-            })
-          })
-
-          // show modal and switch to first time
-          // this is nessasary to get masonary working properly
-          $("#profile_modal").modal('show');
-          $("#tab a:first").tab('show');
-
-        });
-
-      });
-
-  }
-
-  $(function() {
-      setUp();
-  });
-  
-  $("#search").bind("paste keyup", function() {
-    if ($(this).val().length > 0) {
-      
-      $('#matches').hide();
-      $('#results').load($SCRIPT_ROOT + '/search/' + $(this).val(), function() {
-          // re-knobify on new content
-          $(".dial").knob();
-      });
-      $('#results').show();
-      $(".clearer").show();
-
-    } else {
-      $('#matches').show();
-      $('#results').hide();
-      $(".clearer").hide();
-    }
-  });
-
-{% endblock %}
 

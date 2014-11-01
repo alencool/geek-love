@@ -3,15 +3,15 @@
 
 
 <div class="modal-header">
-<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
   <div class="row">
-  
+
     <div class="col-xs-7  col-sm-6 col-md-5 col-lg-5" >
-      
+
       <div class="mhc-outer">
         <img src="{{ url_for('profile_img', username=profile.username) }}"  class="img-circle m-profile_img " alt="..." >
         <span class="mhc-inner" >
-          
+
           <h5>{{ profile.username }}</h5>
           <p> {{profile.age}}, {{profile.gender}}</p>
           
@@ -23,7 +23,7 @@
     <div class="col-xs-5 col-sm-6 col-md-7 col-lg-7 ">
       <div>
         <form accept-charset="UTF-8" action="" method="POST">
-          
+
           <textarea class="col-xs-9" id="new_message" name="new_message"
           placeholder="Write a quick message..." rows="3"></textarea>
           <div class="btn-msg">
@@ -34,96 +34,104 @@
         </form>
       </div>
     </div>
+  </div> <!-- endrow -->
+</div><!-- end header -->
 
-  
-
-
-  </div>
 
 <div class="modal-body">
   <!-- modal content start -->
   <ul id="tab" class="nav nav-tabs">
     <li class=""><a href="#about" data-toggle="tab">About</a></li>
-    <li class="active"><a href="#photos" data-toggle="tab">Photos</a></li>
+    <li class=""><a href="#photos" data-toggle="tab">Photos</a></li>
     <li class=""><a href="#stats" data-toggle="tab">Score</a></li>
   </ul>
-   
-  <div id="tab_content" class="tab-content">
-    <div class="tab-pane fade active in" id="about">
-
-    
-        <div class="col-md-12 col-sm-12">
+  <div id="tab_content">
+    <div  class="tab-content">
+      <div class="tab-pane fade active in" id="about">
+          <div class="col-md-12 col-sm-12">
             <div class="container-fluid">
-                <div class="isotope">
-                    <div class="thumbs col-md-3 col-sm-6">
-                        <div class="thumbnail">
-                            1<br />
-                            text<br />
-                        </div>
+                 <div class="isotope">
+                    <div class="columns col-md-4 col-sm-6 col-xs-12">
+                      {% if profile.height or profile.weight or profile.hair_colour  %}
+
+                      <h5>Appearance</h5>
+                      <p>
+                        {% if profile.height   %}
+                        Height: {{ profile.height }}m </br>
+                        {% endif %}
+
+                        {% if profile.weight  %}
+                        Weight: {{ profile.weight }}kg </br>
+                        {% endif %}
+
+                        {% if  profile.hair_colour  %}
+                        Hair colour: {{ profile.hair_colour }} </br>
+                        {% endif %}
+
+                      </p>
+                      {% endif %}
+
+                      {% if profile.degree %}
+                      <h5>Degree</h5>
+                      <p>
+                        {{ profile.degree }}</br>
+                      </p>
+
+                      {% endif %}
                     </div>
-                    <div class="thumbs col-md-3 col-sm-6">
-                        <div class="thumbnail">
-                            2<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                        </div>
-                    </div>
-                    <div class="thumbs col-md-3 col-sm-6">
-                        <div class="thumbnail">
-                            3<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                        </div>
-                    </div>
-          
-                    <div class="thumbs col-md-3 col-sm-6">
-                        <div class="thumbnail">
-                            7<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                        </div>
-                    </div>
-                    <div class="thumbs col-md-3 col-sm-6">
-                        <div class="thumbnail">
-                            8<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                            text<br />
-                        </div>
-                    </div>
-                </div>
+
+                    {% for fav in favs %}
+                      {% if fav.data %}
+                      <div class="columns col-md-4 col-sm-6 col-xs-12">
+                        <h5>{{fav.title}}</h5>
+                        <p>
+                          {% for item in fav.data %}
+                          {{ item }}</br>
+                          {% endfor %}
+                        </p>
+                      </div>
+                      {% endif %}
+                    {% endfor %}
+                 </div>
             </div>
-        </div>
-      
+          </div>
+      </div>
+
+      <div class="tab-pane fade" id="photos">
 
 
-    </div>
-    <div class="tab-pane fade" id="photos">
 
-      
 
-    </div>
-    <div class="tab-pane fade" id="stats">
-      <p>content</p>
-    
-    </div>
 
+      </div>
+      <div class="tab-pane fade" id="stats">
+          <div class="col-md-12 col-sm-12">
+            <div class="container-fluid">
+              <h5>Breakdown</h5>
+                <table style="padding:10px;">
+
+
+                  {% for line in profile.breakdown %}
+                    <tr>
+                      <td>{{ line[0] }}&nbsp;&nbsp;</td><td>{{ line[1] }}</td>
+                    </tr>
+                  {% endfor %}
+                
+                </table>
+                <em>Total: {{ profile.score }}</em>
+            </div>
+          </div>
+      </div>
+
+
+    </div> <!-- end tab content -->
   </div>
-  <!-- modal content end -->
-
 </div>
+
+
+
+
+
 
 <div class="modal-footer">
   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

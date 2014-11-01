@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% from 'macros.html' import input %}
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+
+
+  <div class="col-lg-4 col-md-5 col-sm-7 col-xs-9 pull-right">
+    <div class="panel panel-default">
+      <div class="panel-body">
+
+        
+        {% if changed %}
+          <p>Hi {{ user.name }} ({{ user.username }})</p>
+          <p>Your password is now changed, you can now <a href="{{ url_for('login') }}">Login</a></p>
+        
+        {% else %}  
+
+        <legend>Set your new password</legend>
+        <form class="form-horizontal" role="form" action="{{ url_for('reset', username=user.username, token=user.token) }}" method=post>
+          <fieldset>
+            {% set f = {} %}
+            {% if request is defined %}
+            {% set f = request.form %}
+            {% endif %}
+
+              {{ input('password', 'New password', error.password, f.password, type='password') }}
+
+            <div class="form-group">
+              <div class="col-xs-8 col-xs-offset-4">
+                
+                <button type="submit" class="btn btn-primary" style="-webkit-user-select: auto;">Set</button>
+            </div>
+
+          </fieldset>
+        </form>
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+

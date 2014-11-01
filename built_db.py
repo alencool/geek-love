@@ -15,16 +15,17 @@ YMD_RE = r'^((19|20)\d\d)/(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])$'
 # return a standardised date in YMD format
 def standardise_birthdate(birthdate):
     # check if birthdate doesnt match standard format already
-    m = re.match(YMD_RE, birthdate)
+    
+    m = re.match(DMY_RE, birthdate)
     if not m:
-        m = re.match(DMY_RE, birthdate)
+        m = re.match(YMD_RE, birthdate)
         if m:
-            # birthdate is in DMY format
-            day, month, year = m.group(1), m.group(2), m.group(3)
+            # birthdate is in YMD format
+            year, month, day  = m.group(1), m.group(2), m.group(3)
         else:
             # non valid birthdate, set default
             day, month, year = '01', '01', '1914'
-        birthdate = year + '/' + month + '/' + day
+        birthdate = day + '/' + month + '/' + year
     return birthdate
 
 # return a list of immediate subdirectories
@@ -70,7 +71,8 @@ for user in users:
                         account[field] = line.strip()
 
     # attempt to fix weird birthdates
-    account['birthdate'] = standardise_birthdate(account['birthdate'])
+    account['birthday'] = standardise_birthdate(account['birthdate'])
+    del account['birthdate']
 
     # code password for security
     account['password'] = authenticate.generate_code(account['password'])
@@ -103,15 +105,15 @@ db.execute('''create table users (
     quote               TEXT,
     height              REAL,
     gender              TEXT,
+    degree              TEXT,
     favourite_bands     TEXT,
     favourite_movies    TEXT,
     favourite_TV_shows  TEXT,
-    degree              TEXT,
     favourite_books     TEXT,
     favourite_hobbies   TEXT,
     hair_colour         TEXT,
     weight              REAL,
-    birthdate           TEXT, 
+    birthday            TEXT, 
     hair_colours        TEXT,
     pref_gender         TEXT,
     age_min             INTEGER,

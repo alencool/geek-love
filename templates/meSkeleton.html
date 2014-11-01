@@ -1,0 +1,85 @@
+<div class="modal-header">
+
+  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+  
+    <div class="overlay-parent" style="float:left;position:relative;">
+      <img src="{{ url_for('profile_img', username=me.username) }}"  class="img-circle" alt="..." >
+      <div class="bottom-overlay"><button type="button" class="btn btn-warning" id="btn_add_profile_pic">Change</button></div>
+      <div class="top-overlay"><button type="button" class="btn btn-danger" >Remove</button></div>
+
+  
+ 
+
+    </div>
+    <div style="margin-left:100px" class="row" id="meHead">
+
+    </div>
+</div><!-- end header -->
+
+
+<div class="modal-body">
+  <!-- modal content start -->
+  <ul id="tab" class="nav nav-tabs">
+    <li class=""><a href="#meAboutTab" data-toggle="tab">About</a></li>
+    <li class=""><a href="#mePhotosTab" data-toggle="tab">Photos</a></li>
+    <li class=""><a href="#mePreferencesTab" data-toggle="tab">Preferences</a></li>
+  </ul>
+
+  <div id="tab_content">
+    <div  class="tab-content">
+      <div class="tab-pane fade active in" id="meAboutTab">
+          <div class="col-xs-12">
+            <div class="row" id="meAbout">
+                
+
+            </div>
+          </div>
+
+      </div>
+
+      <div class="tab-pane fade" id="mePhotosTab">
+          <div class="col-xs-12">
+            <div class="row" id="mePhotos">
+                
+
+            </div>
+          </div>
+
+      </div>
+      <div class="tab-pane fade" id="mePreferencesTab">
+          <div class="col-xs-12">
+            <div class="row" id="mePreferences">
+                
+
+            </div>
+          </div>
+      </div>
+
+
+    </div> <!-- end tab content -->
+  </div>
+</div>
+
+
+<div class="modal-footer">
+
+  <div style="display:none;">
+    <input id='file_photos'       type="file" name="files" multiple>
+    <input id='file_profile_pic'  type="file" name="files">
+  </div>
+
+  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+  <button type="button" class="btn btn-warning" id="btn_add_photos">Add photos</button>
+  <button type="button" class="btn btn-primary" id="btn_save_changes">Save changes</button>
+</div>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,50 @@
+{% from 'macros.html' import input, naked_input, select %}
+
+{% set f = me %}
+{% if request.post is defined %}
+{% set f = request.form %}
+{% endif %}
+
+<div class="col-md-12 col-sm-12 nopad">
+  <div class="container-fluid nopad">
+       <div class="isotope">
+          
+          <div class="columns col-lg-4 col-md-6 col-sm-6 col-xs-12 form-horizontal">
+              <h5>Appearance</h5>
+              {{ input('height', 'Height', error.height, f.height, placeholder='in metres') }}
+              {{ input('weight', 'Weight', error.weight, f.weight, placeholder='in kg') }}
+              {{ input('hair_colour', 'Hair colour', error.hair_colour, f.hair_colour, placeholder='') }}
+
+
+              <h5>Degree</h5>
+              <div class="col-xs-12" style="margin-bottom:11.5px;">
+                    {{ naked_input('degree', value=f.degree) }}
+              </div>
+
+              <h5>Courses</h5>
+              <div class="col-xs-12 ">
+                {% for course in f.courses %}
+                {{ naked_input('courses', value=course) }}
+                {% endfor %}
+                {{ naked_input('courses', value='', class='extendable') }}
+              </div>
+          </div>
+
+          {% for fav in favs %}
+            
+            <div class="columns col-lg-4 col-md-6 col-sm-6 col-xs-12">
+              <h5>{{fav.title}}</h5>
+
+                {% for item in fav.data %}
+                {{ naked_input(fav.name, value=item) }}
+                {% endfor %}
+                {{ naked_input(fav.name, value='', class='extendable') }}
+            </div>
+            
+          {% endfor %}
+       </div>
+  </div>
+</div>
+
+
+
