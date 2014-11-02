@@ -296,6 +296,10 @@ def validate_fullname(fullname, error):
     if not fullname:
         error['fullname'] = 'You can\'t leave this empty.'
 
+def validate_name(name, error):
+    if not name:
+        error['name'] = 'You can\'t leave this empty.'
+
 
 def validate_username(username, error):
     m = re.match(r'^[a-z0-9]{6,30}$', username, re.IGNORECASE)
@@ -345,6 +349,34 @@ def validate_email(email, error):
 def validate_gender(gender, error):
     if not gender:
         error['gender'] = 'Please select a gender.'
+
+def valid_number(num):
+    m = re.match(r'^\d+(\.\d+)?$', num)
+    if m:
+        return True
+    else:
+        return False
+
+def validate_weight(weight, error):
+    if weight and not valid_number(weight):
+        error['weight'] = 'Weight must be a number.'
+
+
+def validate_height(height, error):
+    if height and not valid_number(height):
+        error['height'] = 'Height must be a number.'
+
+
+def validate_range(label, nmin, nmax, error):
+    valid_min = valid_number(nmin)
+    valid_max = valid_number(nmax)
+    if valid_min and valid_max:
+        if float(nmin) >= float(nmax):
+            error[label + '_range'] = 'Min must be less then max.'
+    elif nmin and not valid_min:
+            error[label + '_range'] = 'Min must be a valid number'
+    elif nmax and not valid_max:
+            error[label + '_range'] = 'Max must be a valid number'
 
 
 
@@ -426,6 +458,8 @@ def update_user(user, data):
     values.append(user.id)
     query = ', '.join([ field + ' = ?' for field in fields])
     query = 'UPDATE users SET ' + query + ' WHERE id = ?'
+    print query
+    print values
     db.execute(query, values)
     db.commit()
     db.close()
@@ -798,7 +832,7 @@ def aboutme_load(kind):
         ]
         favs = sorted(favs, key=lambda fav: len(fav['data']), reverse=True)
 
-        return render_template('meAbout.html', me=g.user, error={}, favs=favs)
+        return render_template('meAbout.html', courses=g.user.courses, me=g.user, error={}, favs=favs)
 
     elif kind == 'photos':
         # photos tab contents
@@ -810,7 +844,7 @@ def aboutme_load(kind):
 
     elif kind == 'preferences':
         # preferences tab contents
-        return render_template('mePreferences.html', me=g.user, error={})
+        return render_template('mePreferences.html', hair_colours=g.user.hair_colours, me=g.user, error={})
     else:
         return '<b>helloow</b>'
 
@@ -818,16 +852,108 @@ def aboutme_load(kind):
 # Check fields and return html with error messages if required
 @app.route('/aboutme/check/<kind>', methods=["GET","POST"])
 @login_required
-def about_me_check(kind):
-    pass
+def aboutme_check(kind):
+    f = request.form
+    error = {}
+
+    if kind == 'skeleton':
+        pass
+    elif kind == 'head':
+        # Head of the modal
+        name = f['name']
+        validate_name(name, error)
+
+        birthday = f['birthday']
+        validate_birthday(birthday, error)
+
+        return jsonify(html=render_template('meHead.html', me=g.user, error=error),
+                       error=len(error)>0)
+
+    elif kind == 'about':
+        # about tab contents
+        weight = f['weight']
+        validate_weight(weight, error)
+        
+        height = f['height']
+        validate_height(height, error)
+    
+        courses            = filter(None, f.getlist('courses'))
+        favourite_bands    = filter(None, f.getlist('favourite_bands'))
+        favourite_movies   = filter(None, f.getlist('favourite_movies'))
+        favourite_TV_shows = filter(None, f.getlist('favourite_TV_shows'))
+        favourite_books    = filter(None, f.getlist('favourite_books'))
+        favourite_hobbies  = filter(None, f.getlist('favourite_hobbies'))
+
+        # about tab contents
+        favs = [ 
+            {'title': 'Favourite bands',    'data': favourite_bands,     'name': 'favourite_bands'},
+            {'title': 'Favourite movies',   'data': favourite_movies,    'name': 'favourite_movies'},
+            {'title': 'Favourite TV shows', 'data': favourite_TV_shows,  'name': 'favourite_TV_shows'},
+            {'title': 'Favourite books',    'data': favourite_books,     'name': 'favourite_books'},
+            {'title': 'Favourite hobbies',  'data': favourite_hobbies,   'name': 'favourite_hobbies'},
+        ]
+        favs = sorted(favs, key=lambda fav: len(fav['data']), reverse=True)
+
+        return jsonify(html=render_template('meAbout.html', courses=courses, me=g.user, error=error, favs=favs),
+                       error=len(error)>0)
+
+    elif kind == 'photos':
+        pass
+    elif kind == 'preferences':
+        # preferences tab contents
+        validate_range('age',       f['age_min'],       f['age_max'],       error)
+        validate_range('height',    f['height_min'],    f['height_max'],    error)
+        validate_range('weight',    f['weight_min'],    f['weight_max'],    error)
+
+        hair_colours = f.getlist('hair_colours')
+        return jsonify(html=render_template('mePreferences.html', hair_colours=hair_colours, me=g.user, error=error),
+                       error=len(error)>0)
 
 
 # save fields, updating current user
 @app.route('/aboutme/save/<kind>', methods=["GET","POST"])
 @login_required
-def about_me_load(kind):
-    pass
+def aboutme_save(kind):
+    user = g.user
+    if request.method == 'POST':
+        f = request.form
 
+    if kind == 'skeleton':
+        pass
+    elif kind == 'head':
+        data = {
+            'name'               : f['name'], #'quote'              : f['quote'], 
+            'gender'             : f['gender'], 
+            'birthday'           : f['birthday'] }
+        update_user(user, data)
+
+    elif kind == 'about':
+        data = {
+            'courses'            : '|'.join(filter(None, f.getlist('courses'))), 
+            'favourite_bands'    : '|'.join(filter(None, f.getlist('favourite_bands'))), 
+            'favourite_movies'   : '|'.join(filter(None, f.getlist('favourite_movies'))), 
+            'favourite_TV_shows' : '|'.join(filter(None, f.getlist('favourite_TV_shows'))), 
+            'favourite_books'    : '|'.join(filter(None, f.getlist('favourite_books'))), 
+            'favourite_hobbies'  : '|'.join(filter(None, f.getlist('favourite_hobbies'))), 
+            'height'             : f['height'], 
+            'degree'             : f['degree'], 
+            'hair_colour'        : f['hair_colour'], 
+            'weight'             : f['weight'] }
+        update_user(user, data)
+
+    elif kind == 'photos':
+        pass
+    elif kind == 'preferences':
+        data = {
+            'hair_colours'       : '|'.join(f.getlist('hair_colours')),
+            'pref_gender'        : f['pref_gender'], 
+            'age_min'            : f['age_min'], 
+            'age_max'            : f['age_max'], 
+            'height_min'         : f['height_min'], 
+            'height_max'         : f['height_max'], 
+            'weight_min'         : f['weight_min'], 
+            'weight_max'         : f['weight_max'] }
+        update_user(user, data)
 
 
 

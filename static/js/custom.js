@@ -24,6 +24,17 @@ function setUp() {
     
     /////////////////////// VISUAL ///////////////////////
 
+    function layout(){
+        $('.isotope').isotope({
+            itemSelector: '.columns',
+            transitionDuration: 0,
+            masonry: {
+            columnWidth: '.columns'
+            }
+        })
+
+    }
+
     // custom scrollbar for main body
     $('body >div').mCustomScrollbar({
         theme:"minimal",
@@ -49,7 +60,7 @@ function setUp() {
     $(".dial").knob();
 
     // set up nicer looking select for firefox, dam you firefox
-    $('.selectpicker').selectpicker({});
+    $('.selectpicker').selectpicker();
     
 
     /////////////////////// SEARCH ///////////////////////
@@ -92,7 +103,7 @@ function setUp() {
 
 
 
-    ////////////////////// FORMS ///////////////////////
+    ////////////////////// PROFILES ///////////////////////
 
     // send a user a message
     $('#profile_modal').on('submit', '#form_send_msg', function(event) {
@@ -113,19 +124,15 @@ function setUp() {
     });
 
 
+    ////////////////////// ABOUT ME ///////////////////////
+
 
     // for the last input of extendable fields, increment on new text
     $('body').on('keypress', '.extendable', function(event){
         var newInputHtml = '<div class="form-group">' + $(this).parent().parent().html() + '</div>';
         $(this).removeClass('extendable');
         $(this).parent().parent().parent().append(newInputHtml);
-        $('.isotope').isotope({
-            itemSelector: '.columns',
-            transitionDuration: 0,
-            masonry: {
-            columnWidth: '.columns'
-            }
-        })
+        layout();
 
     });
 
@@ -138,10 +145,6 @@ function setUp() {
             $('input[type=text]:eq(' + next_id + ')').focus();
         }
     });
-
-
-    /////////////////////////////////////////////////////////
-    
 
     // generates event handler for uploading files
     function uploadFiles(location, sucess_handler) {
@@ -168,7 +171,7 @@ function setUp() {
         return uploader;
     }
 
-    // hand response of upload photos
+    // handle response of upload photos
     var upload_photos = uploadFiles( $SCRIPT_ROOT + '/upload_photos',
         function (data, textStatus, jqXHR) {
             alert('uploaded photos');
@@ -182,13 +185,104 @@ function setUp() {
 
     $('#profile_modal').on('change', '#file_photos', upload_photos);
     $('#profile_modal').on('change', '#file_profile_pic', upload_profile_pic);
-    $('#profile_modal').on('click', '#btn_add_photos', function() { 
-        $('#file_photos').trigger('click');
-    });
+    
+    
+    // Connect up the buttons
     $('#profile_modal').on('click', '#btn_add_profile_pic', function() {
         $('#file_profile_pic').trigger('click');
     });
 
+    $('#profile_modal').on('click', '#btn_add_photos', function() { 
+        $('#file_photos').trigger('click');
+    });
+
+
+    function postForm (formSelector, relative_url, handler) {
+        var formData = $(formSelector).serialize();
+        $.ajax({
+            url: $SCRIPT_ROOT + relative_url,
+            type: 'POST',
+            data: formData,
+            cache: false,
+            success: handler
+        });
+    }
+
+
+    // keep track of all checks
+    var no_error;
+
+    function meHeadCheckHandler (data, textStatus, jqXHR) {
+        // check response
+        no_error = true;
+        $("#meHead").html(data.html);
+        $('.selectpicker').selectpicker();
+        layout();
+        if (data.error){
+            no_error = false;
+        }
+
+
+        console.log('verified head');
+        postForm('#form_meAbout', '/aboutme/check/about', meAboutCheckHandler);
+    }
+
+
+    function meAboutCheckHandler (data, textStatus, jqXHR) {
+        // check response
+
+        $("#meAbout").html(data.html);
+        $('.selectpicker').selectpicker();
+        layout();
+        if (data.error){
+            no_error = false;
+            $("#tab a:first").tab('show');
+        }
+
+
+        console.log('verified about');
+        postForm('#form_mePreferences', '/aboutme/check/preferences', mePreferencesCheckHandler);
+    }
+
+    function mePreferencesCheckHandler (data, textStatus, jqXHR) {
+        // check response
+
+        $("#mePreferences").html(data.html);
+        var selected = $('#hair_colours').data('selected').split(" ");
+        $('#pref_gender').selectpicker({width: '70%'});
+        $('#hair_colours').selectpicker({width: '70%'});
+        $('#hair_colours').selectpicker('val', selected);
+        layout();
+        if (data.error){
+            if (no_error){
+                $("#tab a:last").tab('show');
+            }
+            no_error = false;
+        }
+
+        console.log('verified preferences');
+        console.log('no_error: ' + no_error);
+    
+        // if no errors on the forms then save them
+        if (no_error) {
+            postForm('#form_meHead', '/aboutme/save/head');
+            postForm('#form_meAbout', '/aboutme/save/about');
+            postForm('#form_mePreferences', '/aboutme/save/preferences');
+            $('#profile_modal').modal('hide');
+        }
+    }
+
+    $('#profile_modal').on('click', '#btn_save_changes', function() {
+        // start verifying forms
+        postForm('#form_meHead', '/aboutme/check/head', meHeadCheckHandler);
+
+
+    });
+
+
+
+
+    /////////////////////// CORNER MENU LINK //////////////////////////
 
     // connect up my about me to modal link
     $('#aboutmelink').on('click', function(event){
@@ -198,21 +292,17 @@ function setUp() {
 
             // on tab shown trigger masonary
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                
-                $('.isotope').isotope({
-                    itemSelector: '.columns',
-                    transitionDuration: 0,
-                    masonry: {
-                    columnWidth: '.columns'
-                    }
-                })
+                layout();
             })  
 
 
             $("#meHead").load($SCRIPT_ROOT + '/aboutme/load/head', function() {
                 $('.selectpicker').selectpicker();
             });
-            $("#meAbout").load($SCRIPT_ROOT + '/aboutme/load/about');
+            $("#meAbout").load($SCRIPT_ROOT + '/aboutme/load/about', function() {
+                $('.selectpicker').selectpicker();
+            });
+
             $("#mePhotos").load($SCRIPT_ROOT + '/aboutme/load/photos');
 
             $("#mePreferences").load($SCRIPT_ROOT + '/aboutme/load/preferences', function() {
@@ -230,7 +320,7 @@ function setUp() {
         
     });
 
-    /////////////////////// USER CARDS //////////////////////////////
+    /////////////////////// USER CARDS LINK //////////////////////////////
 
     
     // connect up card to profile modal link
@@ -244,14 +334,7 @@ function setUp() {
 
             // on tab shown trigger masonary
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                
-                $('.isotope').isotope({
-                    itemSelector: '.columns',
-                    transitionDuration: 0,
-                    masonry: {
-                    columnWidth: '.columns'
-                    }
-                })
+                layout();
             })
             
             // show modal and switch to first time

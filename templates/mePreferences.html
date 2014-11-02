@@ -1,24 +1,25 @@
 {% from 'macros.html' import range_input, naked_input, naked_select, multi_select %}
 
 {% set f = me %}
-{% if request.post is defined %}
+{% if request is defined and request.method == 'POST' %}
 {% set f = request.form %}
 {% endif %}
 
 <div class="col-md-12 col-sm-12 nopad">
   <div class="container-fluid nopad">
        <div class="isotope">
+           <form id="form_mePreferences"> 
+
             <div class="columns col-lg-4 col-md-6 col-sm-6 col-xs-12 ">
-                <form class="form-horizontal" role="form" >
+                <div class="form-horizontal" role="form" >
                 <fieldset>
                     <h5>Preferred gender</h5>
                     
                     {{ naked_select('pref_gender', values=['Male', 'Female', 'Either'], selected=f.pref_gender) }}
 
                     <h5>Preferred hair colours</h5>
-
                 
-                    {{ multi_select('hair_colours', values=['blonde', 'black','brown', 'blue', 'red', 'grey', 'white'], selected=f.hair_colours|join(' '), placeholder='select...')  }}
+                    {{ multi_select('hair_colours', values=['blonde', 'black','brown', 'blue', 'red', 'grey', 'white'], selected=hair_colours|join(' '), placeholder='select...')  }}
                     <br>
                     <br>
                     <br>
@@ -30,24 +31,25 @@
                     <br>
                     <br>
                 </fieldset>
-                </form>
+                </div>
             </div>
 
             <div class="columns col-lg-4 col-md-6 col-sm-6 col-xs-12">
                 <h5>Preferred age</h5>
-                {{ range_input('age_min', 'age_max', value_min=f.age_min, value_max=f.age_max, error='') }}
+                {{ range_input('age_min', 'age_max', value_min=f.age_min, value_max=f.age_max, error=error.age_range) }}
             </div>
 
             <div class="columns col-lg-4 col-md-6 col-sm-6 col-xs-12">
                 <h5>Preferred height</h5>
-                {{ range_input('height_min', 'height_max', value_min=f.height_min, value_max=f.height_max, error='') }}
+                {{ range_input('height_min', 'height_max', value_min=f.height_min, value_max=f.height_max, error=error.height_range) }}
             </div>
 
             <div class="columns col-lg-4 col-md-6 col-sm-6 col-xs-12">
                 <h5>Preferred weight</h5>
-                {{ range_input('weight_min', 'weight_max', value_min=f.weight_min, value_max=f.weight_max, error='') }}
+                {{ range_input('weight_min', 'weight_max', value_min=f.weight_min, value_max=f.weight_max, error=error.weight_range) }}
             </div>
-            
+
+            </form>
 
        </div>
   </div>

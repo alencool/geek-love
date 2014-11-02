@@ -1,22 +1,22 @@
 
 {%- macro textarea(name, value='', rows=10, cols=40) -%}
-    <textarea name="{{ name }}" rows="{{ rows }}" cols="{{ cols
-        }}">{{ value|e }}</textarea>
+    <textarea name='{{ name }}' rows='{{ rows }}' cols='{{ cols
+        }}'>{{ value|e }}</textarea>
 {%- endmacro %}
 
 {% macro show_cards(profiles) %}
     {% for profile in profiles %}
       <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3 card">
-        <a href="#" data-username="{{ profile.username }}" class="profile_link">  
+        <a href="#" data-username='{{ profile.username }}' class="profile_link">  
 
           <div class="profile_imgd ">
                 <div class="overlay">
-                   <input type="hidden" value="{{ profile.scaled_score }}" class="dial" 
+                   <input type="hidden" value='{{ profile.scaled_score }}' class="dial" 
                    data-width="80" data-height="80" data-readOnly=true data-linecap=round 
-                   data-bgColor="white" data-fgColor="{{ profile.colour }}" 
+                   data-bgColor="white" data-fgColor='{{ profile.colour }}' 
                    data-displayInput=false data-thickness="0.13">
                  </div>
-            <img src="{{ url_for('profile_img', username=profile.username) }}"  
+            <img src='{{ url_for('profile_img', username=profile.username) }}'  
                  class="img-circle profile_img" alt="..." >
                  
           </div>
@@ -39,9 +39,9 @@
 
 {% macro input(name, label, error='', value='', type='text', placeholder='') -%}
   <div class="form-group{% if error %} has-error{% endif %}">
-    <label for="{{ name }}" class="col-xs-4 control-label" >{{ label }}</label>
+    <label for='{{ name }}' class="col-xs-4 control-label" >{{ label }}</label>
     <div class="col-xs-8">
-      <input type="{{ type }}" class="form-control input-sm" value="{{ value|e }}" name="{{ name }}" id="{{ name }}" placeholder="{{ placeholder }}">
+      <input type='{{ type }}' class="form-control input-sm" value='{{ value|e }}' name='{{ name }}' id='{{ name }}' placeholder='{{ placeholder }}'>
       {% if error %}
             <span class="help-block">{{ error }}</span>
       {% endif %}
@@ -54,7 +54,7 @@
 {% macro naked_input(name, value='', type='text', class='', placeholder='') -%}
   <div class="form-group">
     <div class="col-xs-12" style="padding:0px !important;">
-      <input type="{{ type }}" class="form-control input-sm {{ class }}" value="{{ value|e }}" name="{{ name }}" placeholder="{{ placeholder }}">
+      <input type='{{ type }}' class="form-control input-sm {{ class }}" value='{{ value|e }}' name='{{ name }}' placeholder='{{ placeholder }}'>
     </div>
 
   </div>
@@ -63,31 +63,35 @@
 
 {% macro range_input(name_min, name_max, value_min='', value_max='', error='', type='text', placeholder_min='', placeholder_max='') -%}
   <div class="form-group{% if error %} has-error{% endif %}">
-    <label for="{{ name_min }}" class="col-xs-2 control-label" style="text-align: right;">Min</label>
+    <label for='{{ name_min }}' class="col-xs-2 control-label" style="text-align: right;">Min</label>
     <div class="col-xs-3">
-      <input type="{{ type }}" class="form-control input-sm" value="{{ value_min|e }}" name="{{ name_min }}" placeholder="{{ placeholder_min }}">
+      <input type='{{ type }}' class="form-control input-sm" value='{{ value_min|e }}' name='{{ name_min }}' placeholder='{{ placeholder_min }}'>
     </div>
-    <label for="{{ name_max }}" class="col-xs-2 control-label" style="text-align: right;">Max</label>
+    <label for='{{ name_max }}' class="col-xs-2 control-label" style="text-align: right;">Max</label>
     <div class="col-xs-3">
-      <input type="{{ type }}" class="form-control input-sm" value="{{ value_max|e }}" name="{{ name_max }}" placeholder="{{ placeholder_max }}">
+      <input type='{{ type }}' class="form-control input-sm" value='{{ value_max|e }}' name='{{ name_max }}' placeholder='{{ placeholder_max }}'>
 
     </div>
+    
       {% if error %}
+      <div class="col-xs-12">
             <span class="help-block">{{ error }}</span>
+      </div>
       {% endif %}
+
   </div>
 {%- endmacro %}
 
 
-{% macro select(name, label, error='', values=[], selected='', placeholder='') -%}
+{% macro select(name, label, error='', values=[], selected='', disabled=True, placeholder='') -%}
 
   <div class="form-group{% if error %} has-error{% endif %}">
-    <label for="{{ name }}" class="col-xs-4 control-label" >{{ label }}</label>
+    <label for='{{ name }}' class="col-xs-4 control-label" >{{ label }}</label>
     <div class="col-xs-8">
-      <select class="form-control input-sm  selectpicker" name="{{ name }}" id="{{ name }}" style="visibility:hidden;">
-          <option value="" {% if not selected %} selected {% endif %} disabled="disabled" style='display:none;color: #999;'>{{ placeholder }}</option>
+      <select class="form-control input-sm  selectpicker" name='{{ name }}' id='{{ name }}' data-hideDisabled='false' style="visibility:hidden;">
+          <option value='' {% if not selected %} selected {% endif %} {% if disabled==True %} disabled="disabled" {% endif %}>{{ placeholder }}</option>
           {% for value in values %}
-          <option value="{{ value }}" {% if selected==value %} selected {% endif %}>{{ value }}</option>
+          <option value='{{ value }}' {% if selected==value %} selected {% endif %}>{{ value }}</option>
           {% endfor %}
 
       </select>
@@ -105,9 +109,9 @@
 
   <div class="form-group">
     <div class="col-xs-12">
-      <select class="form-control input-sm  selectpicker" name="{{ name }}" id="{{ name }}" style="visibility:hidden;">
+      <select class="form-control input-sm  selectpicker" name='{{ name }}' id='{{ name }}' style="visibility:hidden;">
           {% for value in values %}
-          <option value="{{ value }}" {% if selected==value %} selected {% endif %}>{{ value }}</option>
+          <option value='{{ value }}' {% if selected==value %} selected {% endif %}>{{ value }}</option>
           {% endfor %}
 
       </select>
@@ -122,10 +126,10 @@
 
 <div class="form-group">
   <div class="col-xs-12">
-    <select class="selectpicker" multiple title='{{ placeholder }}' name="{{ name }}" id="{{ name }}" 
-            data-selected="{{ selected }}" data-width="100%" style="visibility:hidden;">
+    <select class="selectpicker" multiple title='{{ placeholder }}' name='{{ name }}' id='{{ name }}' 
+            data-selected='{{ selected }}' data-width="100%" style="visibility:hidden;">
         {% for value in values %}
-        <option value="{{ value }}">{{ value }}</option>
+        <option value='{{ value }}'>{{ value }}</option>
         {% endfor %}
     </select>
   </div>

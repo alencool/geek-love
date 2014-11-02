@@ -21,7 +21,7 @@ def standardise_birthdate(birthdate):
         m = re.match(YMD_RE, birthdate)
         if m:
             # birthdate is in YMD format
-            year, month, day  = m.group(1), m.group(2), m.group(3)
+            year, month, day  = m.group(1), m.group(3), m.group(4)
         else:
             # non valid birthdate, set default
             day, month, year = '01', '01', '1914'

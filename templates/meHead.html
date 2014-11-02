@@ -1,13 +1,12 @@
 {% from 'macros.html' import input, select %}
 <div class="col-lg-4 col-md-4 col-sm-6 col-xs-7">
     
-    <form class="form-horizontal" role="form" >
+    <form class="form-horizontal" role="form" id="form_meHead">
     <fieldset>
       
 
           {% set f = me %}
-          {% if request.post is defined %}
-
+          {% if request is defined and request.method == 'POST' %}
           {% set f = request.form %}
           {% endif %}
 
