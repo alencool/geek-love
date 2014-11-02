@@ -1,0 +1,35 @@
+{% from 'macros.html' import input %}
+
+{% set f = g.user %}
+
+
+
+
+  <div class="panel panel-default" style="height: 280px;">
+    <div class="panel-body">
+ 
+        <div class="form-horizontal" role="form" id="formPanelPassword">
+     {% if f.status == 'ACTIVE' %}
+        <legend>Suspend your account </legend>
+        <button type="button" class="btn btn-warning btn-account" data-action="SUSPEND">Suspend</button>
+
+        <br><small>(be removed from browse results)</small>
+    {% else %}
+        <legend>Activate your account </legend>
+        <button type="button" class="btn btn-success btn-account" data-action="ACTIVATE">Activate</button>
+        <br><small>(show in browse results)</small>
+    {% endif %}
+
+        <br>
+        <br>
+    {% if confirm %}
+        <legend>Delete forever?</legend>
+        <button type="button" class="btn btn-danger btn-account" data-action="DELETE_CONFIRM">Confirm</button>
+    {% else %}
+        <legend>Delete your account.</legend>
+        <button type="button" class="btn btn-danger btn-account" data-action="DELETE">Delete</button>
+    {% endif %}
+
+        </div>
+    </div>
+  </div>

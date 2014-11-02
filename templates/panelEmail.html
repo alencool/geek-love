@@ -1,0 +1,30 @@
+{% from 'macros.html' import inputpanel %}
+
+{% set f = g.user %}
+{% if request is defined and request.method == 'POST' %}
+{% set f = request.form %}
+{% endif %}
+
+
+
+
+  <div class="panel panel-default"  style="height: 280px;">
+    <div class="panel-body">
+ 
+        <legend>Change your email</legend>
+        <form class="form-horizontal" role="form" id="formPanelEmail" method=post>
+          <fieldset>
+    
+            {{ inputpanel('email', 'Email', error.email, f.email) }}
+
+            <div class="form-group">
+              <div class="col-xs-10 col-xs-offset-2">
+                <button type="submit" class="btn btn-primary" style="-webkit-user-select: auto;">Change</button>
+                {% if changed %} <em>Changed</em> {% endif %} 
+              </div>
+            </div>
+
+          </fieldset>
+        </form>
+    </div>
+  </div>

@@ -20,7 +20,7 @@
       
       <a href="#" class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
         Welcome, {{g.user.name}}     
-        <img src="{{ url_for('profile_img', username=g.user.username) }}" class="img-circle user_img" alt="...">
+        <img src="{{ url_for('profile_img', username=g.user.username) }}?{{g.random}}" class="img-circle user_img" alt="...">
       </a>
       
 
@@ -29,7 +29,7 @@
         
 
 
-        <li><a href="#"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+        <li><a href="#" id="settingslink"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
         <li class="divider"></li>
         <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-off"></span> Logout</a></li>
       </ul>
@@ -86,16 +86,6 @@
   </div>
 </div>
 
-
-<!-- Modal Selected user profile -->
-<div class="modal fade" id="myphotos_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog ">
-    <div class="modal-content">
-      
-
-    </div>
-  </div>
-</div>
 
 {% if msg_username %}
   <div style="display:none;">

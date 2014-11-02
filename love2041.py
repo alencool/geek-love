@@ -1,5 +1,5 @@
 # all the imports
-import sqlite3, os, re, glob, smtplib, authenticate
+import sqlite3, os, re, glob, smtplib, authenticate, shutil
 from PIL import Image
 from authenticate import generate_salt, generate_code, matched_code
 from functools import wraps
@@ -476,6 +476,25 @@ def update_user(user, data):
     for key in data:
         user._data[key] = data[key]
 
+
+# takes a user dict and fields dict then updates db and user dict
+def delete_user(user):
+    db = sqlite3.connect(app.config['DATABASE'])
+    query = 'DELETE  FROM users WHERE id = ?'
+    db.execute(query, [user.id])
+    db.commit()
+    db.close()
+    delete_path = os.path.join('static', 'profile', user.username)
+    if os.path.exists(delete_path):
+        shutil.rmtree(delete_path)
+
+
+
+@app.before_request
+def before_request():
+    # used for added query string to force redownload on certain images
+    g.random = generate_salt()
+
 # Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -606,9 +625,6 @@ def forgot_password():
 
     return render_template('forgot.html', error=error, sent=sent)
 
-
-#TODO ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------
-
 # Reset a users password
 @app.route('/reset/<username>/<token>', methods=['GET', 'POST'])
 def reset(username, token):
@@ -669,7 +685,6 @@ def profile_img(username):
         path = 'profile.jpg'
     os.chdir(prevdir)
     return app.send_static_file(path)
-
 
 # quote
 #     <i>Italic</i>, <b>Bold</b> and <u>Underline</u> supported.
@@ -794,47 +809,21 @@ def upload_photos(files):
 @login_required
 @file_loader
 def upload_profile_pic(files):
-    for file in files:
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    # create save path
+    save_path = os.path.join('static', 'profile', g.user.username)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    if files:
+        file = files[0]
+        name = 'newprofile.jpg'
+        static_path = os.path.join('profile', g.user.username, name)
+        file_path = os.path.join(save_path, name)
+        file.save(file_path)
+        resize_image(file_path)
+        return render_template('meProfilePic.html', profile_pic=static_path)
+    else:
+        return render_template('meProfilePic.html', profile_pic='')
 
-    return 'hello'
-
-
-
-    
-
-
-# # Return inner html for potentially added photos
-# @app.route('/upload_photos', methods=["GET","POST"])
-# @login_required
-# def upload_photos(files):
-#     if request.method == 'POST':
-        
-#         print 'what what', len(request.files)
-#         uploaded_files = request.files.getlist("files")
-
-#         for pic in uploaded_files:
-#             print pic.filename
-#         # file = request.files['0'];
-#         # file = request.files['file']
-
-#         # if file: #and allowed_file(file.filename):
-#         #     print file
-#         #     filename = secure_filename(file.filename)
-#         #     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#     #         return redirect(url_for('uploaded_file',
-#     #                                 filename=filename))
-
-
-#     # uploaded_files = request.files.getlist("files")
-#     # print 'gettting files'
-#     # print uploaded_files
-
-#     return '<b>hello</b>'
-
-
-#     # return render_template('my_photos.html', urls=urls)
 
 # load fields as html forms
 @app.route('/aboutme/load/<kind>', methods=["GET","POST"])
@@ -865,13 +854,22 @@ def aboutme_load(kind):
         favs = sorted(favs, key=lambda fav: len(fav['data']), reverse=True)
 
         return render_template('meAbout.html', courses=g.user.courses, me=g.user, error={}, favs=favs)
+    elif kind == 'profile_pic':
+        profile_pic = get_user_files(g.user.username, 'profile.jpg')
+        if profile_pic:
+            profile_pic = profile_pic[0]
+        else:
+            profile_pic = ''
+        return render_template('meProfilePic.html', profile_pic=profile_pic)
+
+    elif kind == 'profile_pic_none':
+        return render_template('meProfilePic.html', profile_pic='')
 
     elif kind == 'photos':
         # photos tab contents
         files = get_user_files(g.user.username, 'photo*.jpg')
         urls = [ (url_for('static', filename=filename ), 
                   os.path.basename(filename)) for filename in files]
-
         return render_template('mePhotos.html', urls=urls)
 
     elif kind == 'preferences':
@@ -988,7 +986,25 @@ def aboutme_save(kind):
             renameto = os.path.join(os.path.dirname(photo), os.path.basename(photo)[3:])
             os.rename(photo, renameto)
         os.chdir(prevdir)
-        
+    
+    elif kind == 'profile_pic':
+        # Remove profile pic marked for deletion
+        path = get_user_path(g.user.username)
+        if f['remove']:
+            pic = get_user_files(g.user.username, pattern='profile.jpg')
+            if pic:
+                remove_user_files(g.user.username, pic)
+        else:
+            pic = get_user_files(g.user.username, pattern='newprofile.jpg')
+            if pic:
+                # Rename new pic
+                pic = pic[0]
+                renameto = os.path.join(os.path.dirname(pic), os.path.basename(pic)[3:])                
+                prevdir = os.getcwd()
+                os.chdir('static')         
+                os.rename(pic, renameto)
+                os.chdir(prevdir)
+
 
     elif kind == 'preferences':
         data = {
@@ -1002,6 +1018,67 @@ def aboutme_save(kind):
             'weight_max'         : f['weight_max'] }
         update_user(user, data)
     return ''
+
+
+# Panels for account settings
+@app.route('/panel/<kind>', methods=["GET","POST"])
+@login_required
+def settings_panel(kind):
+    user = g.user
+    error = {}
+    changed = False
+
+    if kind == 'skeleton':
+        return render_template('panelSkeleton.html')
+
+    elif kind == 'email':
+        if request.method == 'POST':
+            email = request.form['email']
+            validate_email(email, error)
+            if email.lower() == user.email.lower():
+                error['email'] = 'Already the current email.'
+            if not error:
+                update_user(user, {'email':email})
+                changed = True
+
+        return render_template('panelEmail.html', error=error, changed=changed)
+    elif kind == 'password':
+        if request.method == 'POST':
+            password = request.form.get('oldpassword')
+
+            if not matched_code(password, user.password):
+                error['oldpassword'] = 'Incorrect password'
+            newpassword = request.form.get('password')
+            validate_password(newpassword, error)
+            if not error:
+                password = generate_code(newpassword)
+                update_user(user, {'password': password})
+                changed = True
+        return render_template('panelPassword.html', error=error, changed=changed)
+
+    elif kind == 'status':
+        confirm = False
+        if request.method == 'POST':
+            action = request.form['action']
+            if action == 'SUSPEND':
+                # inactivate account
+                update_user(user, {'status': 'INACTIVE'})
+            elif action == 'ACTIVATE':
+                # reactivate account
+                update_user(user, {'status': 'ACTIVE'})
+            elif action == 'DELETE':
+                # render panel with 'are you sure?'
+                confirm = True
+            elif action == 'DELETE_CONFIRM':
+                # okay delete account
+                delete_user(user)
+                return ''
+
+        #render current account information
+        return render_template('panelStatus.html', confirm=confirm)
+
+
+
 
 if __name__ == '__main__':
     app.debug = True

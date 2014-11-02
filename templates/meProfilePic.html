@@ -1,0 +1,11 @@
+
+{% if profile_pic %}
+<img src="{{ url_for('static', filename=profile_pic) }}?{{g.random}}"  class="img-circle" alt="..." >
+{% else %}
+<img src="{{ url_for('static', filename='profile.jpg') }}"  class="img-circle" alt="..." >
+{% endif %}
+
+<div class="bottom-overlay"><button type="button" class="btn btn-warning" id="btn_add_profile_pic">Change</button></div>
+{% if profile_pic %}
+<div class="top-overlay"><button type="button" class="btn btn-danger" id="btn_remove_profile_pic">Remove</button></div>
+{% endif %}

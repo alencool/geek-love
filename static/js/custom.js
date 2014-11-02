@@ -179,7 +179,10 @@ function setUp() {
     // handle response of upload profile pic
     var upload_profile_pic = uploadFiles( $SCRIPT_ROOT + '/upload_profile_pic',
         function (data, textStatus, jqXHR) {
-            console.log('uploaded profile pic');
+            console.log(data);
+            $('#meProfilePic').html(data);
+            $('#meProfilePic').data('remove', '')
+
     });
 
     $('#profile_modal').on('change', '#file_photos', upload_photos);
@@ -190,6 +193,12 @@ function setUp() {
     $('#profile_modal').on('click', '#btn_add_profile_pic', function() {
         $('#file_profile_pic').trigger('click');
     });
+
+    $('#profile_modal').on('click', '#btn_remove_profile_pic', function() {
+        $('#meProfilePic').load($SCRIPT_ROOT + '/aboutme/load/profile_pic_none');
+        $('#meProfilePic').data('remove', 'true')
+    });
+
 
     $('#profile_modal').on('click', '#btn_add_photos', function() { 
         $('#file_photos').trigger('click');
@@ -272,6 +281,7 @@ function setUp() {
             postForm('#form_meAbout', '/aboutme/save/about');
             postForm('#form_mePreferences', '/aboutme/save/preferences');
             postData({'toremove': $('#mePhotos').data('toremove')}, '/aboutme/save/photos');
+            postData({'remove': $('#meProfilePic').data('remove')}, '/aboutme/save/profile_pic');
             $('#brand').click();
             $('#profile_modal').modal('hide');
         }
@@ -315,6 +325,7 @@ function setUp() {
                 layout();
             })  
 
+            $("#meProfilePic").load($SCRIPT_ROOT + '/aboutme/load/profile_pic');
 
             $("#meHead").load($SCRIPT_ROOT + '/aboutme/load/head', function() {
                 $('.selectpicker').selectpicker();
@@ -340,7 +351,78 @@ function setUp() {
         
     });
 
-    /////////////////////// USER CARDS LINK //////////////////////////////
+
+    // connect up my settings to modal link
+    $('#settingslink').on('click', function(event){
+        event.preventDefault();
+        // load event handler, connect up js here
+        $('#profile_modal .modal-content').load($SCRIPT_ROOT + '/panel/skeleton', function() {
+
+      
+            $("#email_panel").load($SCRIPT_ROOT + '/panel/email');
+            $("#password_panel").load($SCRIPT_ROOT + '/panel/password');
+            $("#status_panel").load($SCRIPT_ROOT + '/panel/status');
+
+            $("#profile_modal").modal('show');
+        });
+        
+    });
+    ///////////////////// SETTINGS PANEL BUTTON ///////////////////////
+
+
+    $('#profile_modal').on('submit', '#formPanelEmail', function(event) {
+        event.preventDefault(); 
+
+        var formData = $('#formPanelEmail').serialize();
+        $.ajax({
+            url: $SCRIPT_ROOT + '/panel/email',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            success: function(data, textStatus, jqXHR) {
+                $('#email_panel').html(data)
+            }
+        });
+    });
+
+
+    $('#profile_modal').on('submit', '#formPass', function(event) {
+        event.preventDefault(); 
+        var data = $('#formPass').serialize();
+        
+        $.post($SCRIPT_ROOT + '/panel/password', data, function(ndata){
+            $('#password_panel').html(ndata)
+
+        });
+    });
+    $('#profile_modal').on('click', '.btn-account', function() {
+        // start verifying forms
+        data = {'action': $(this).data('action')}
+        $.post($SCRIPT_ROOT + '/panel/status', data, function(ndata){
+            $('#status_panel').html(ndata)
+            console.log(data)
+
+        });
+    });
+
+
+    $('#profile_modal').on('click', '.btn-account', function() {
+        // start verifying forms
+        data = {'action': $(this).data('action')}
+        if (data.action == 'DELETE_CONFIRM'){
+            $.post($SCRIPT_ROOT + '/panel/status', data, function(ndata){
+                $('#brand').click();
+            }); 
+        } else {
+            $.post($SCRIPT_ROOT + '/panel/status', data, function(ndata){
+                $('#status_panel').html(ndata)
+            });
+        }
+
+    
+    });
+
+    /////////////////////// USER CARDS LINK ///////////////////////////
 
     
     // connect up card to profile modal link
