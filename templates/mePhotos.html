@@ -1,6 +1,7 @@
-{% for url in urls %}
+{% for url, filename in urls %}
 
-<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4 photo-item" >
+<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4 photo-item overlay-parent" >
+    <div class="top-overlay"><button type="button" data-filename="{{ filename }}" class="btn btn-danger remove-photo" >Remove</button></div>
     <img class="img-responsive" src="{{ url }}"/>
 </div>
 {% endfor %}

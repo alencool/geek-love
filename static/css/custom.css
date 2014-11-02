@@ -194,6 +194,7 @@ bottom: 0px;
 .bottom-overlay {
     position: absolute;
     bottom: 0;
+    margin-bottom: 10px;
     width: 100%;
     display: none;
     text-align:center;
@@ -203,6 +204,7 @@ bottom: 0px;
 .top-overlay {
     position: absolute;
     top: 0;
+    margin-top: 10px;
     width: 100%;
     display: none;
     text-align:center;

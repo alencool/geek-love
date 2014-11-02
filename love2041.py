@@ -282,6 +282,10 @@ def get_matches():
         users = g.user.sort_by_score(users)
     return users
 
+# get user path relative to static folder
+def get_user_path(username):
+    return os.path.join('profile', username)
+
 # get user files relative to static folder
 def get_user_files(username, pattern='*'):
     prevdir = os.getcwd()
@@ -290,6 +294,14 @@ def get_user_files(username, pattern='*'):
     files = glob.glob(path) or []
     os.chdir(prevdir)
     return files
+
+# remove user files relative to static folder
+def remove_user_files(username, user_files):
+    prevdir = os.getcwd()
+    os.chdir('static')
+    for f in user_files:
+        os.remove(f)        
+    os.chdir(prevdir)
 
 
 def validate_fullname(fullname, error):
@@ -458,8 +470,6 @@ def update_user(user, data):
     values.append(user.id)
     query = ', '.join([ field + ' = ?' for field in fields])
     query = 'UPDATE users SET ' + query + ' WHERE id = ?'
-    print query
-    print values
     db.execute(query, values)
     db.commit()
     db.close()
@@ -727,7 +737,7 @@ def photos(username):
     os.chdir(prevdir)
     return render_template('photos.html', urls=urls)
 
-# Resize images to be square 250x250
+# Crop images to be square
 def resize_image(filename):
     img = Image.open(filename)
     width, height = img.size
@@ -746,8 +756,7 @@ def resize_image(filename):
        lower = width + upper
 
     img = img.crop((left, upper, right, lower))
-    img.thumbnail(250, Image.ANTIALIAS)
-    img.save(filename)
+    img.save(filename, "JPEG")
 
 
 
@@ -756,12 +765,29 @@ def resize_image(filename):
 @login_required
 @file_loader
 def upload_photos(files):
+    #get highest number file
+    top_num = 0
+    photos = get_user_files(g.user.username, pattern='*photo*.jpg')
+    for filename in photos:
+        num = int(re.findall(r'[0-9]+', os.path.basename(filename))[0])
+        top_num = max(num, top_num)
+    
+    # create save path
+    save_path = os.path.join('static', 'profile', g.user.username)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    urls = []
     for file in files:
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        top_num += 1
+        name = 'newphoto'+str(top_num)+'.jpg'
+        static_path = os.path.join('profile', g.user.username, name)
+        urls.append((url_for('static', filename=static_path ), name))
+        file_path = os.path.join(save_path, 'newphoto'+str(top_num)+'.jpg')
+        file.save(file_path)
+        resize_image(file_path)
 
-    return 'hello'
-
+    return render_template('mePhotos.html', urls=urls)
 
 # Return inner html for potentially added profile picture
 @app.route('/upload_profile_pic', methods=["GET","POST"])
@@ -815,6 +841,12 @@ def upload_profile_pic(files):
 @login_required
 def aboutme_load(kind):
     if kind == 'skeleton':
+        # Remove discarded changes
+        photos = get_user_files(g.user.username, pattern='newphoto*.jpg')
+        remove_user_files(g.user.username, photos)
+        profile_pic = get_user_files(g.user.username, pattern='newprofile.jpg')
+        remove_user_files(g.user.username, profile_pic)
+
         # Structure of the modal
         return render_template('meSkeleton.html', me=g.user)
     elif kind == 'head':
@@ -837,8 +869,8 @@ def aboutme_load(kind):
     elif kind == 'photos':
         # photos tab contents
         files = get_user_files(g.user.username, 'photo*.jpg')
-
-        urls = [ url_for('static', filename=filename ) for filename in files]
+        urls = [ (url_for('static', filename=filename ), 
+                  os.path.basename(filename)) for filename in files]
 
         return render_template('mePhotos.html', urls=urls)
 
@@ -942,7 +974,22 @@ def aboutme_save(kind):
         update_user(user, data)
 
     elif kind == 'photos':
-        pass
+        # Remove photos marked for deletion
+        path = get_user_path(g.user.username)
+        toremove = f['toremove'].split()
+        photos = [os.path.join(path, photo) for photo in toremove]
+        remove_user_files(g.user.username, photos)
+
+        # Rename new photos
+        photos = get_user_files(g.user.username, pattern='newphoto*.jpg')
+        prevdir = os.getcwd()
+        os.chdir('static')         
+        for photo in photos:
+            renameto = os.path.join(os.path.dirname(photo), os.path.basename(photo)[3:])
+            os.rename(photo, renameto)
+        os.chdir(prevdir)
+        
+
     elif kind == 'preferences':
         data = {
             'hair_colours'       : '|'.join(f.getlist('hair_colours')),
@@ -954,8 +1001,7 @@ def aboutme_save(kind):
             'weight_min'         : f['weight_min'], 
             'weight_max'         : f['weight_max'] }
         update_user(user, data)
-
-
+    return ''
 
 if __name__ == '__main__':
     app.debug = True

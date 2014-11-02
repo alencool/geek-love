@@ -140,7 +140,6 @@ function setUp() {
     $('body').on('keydown','.modal input', function (event) {
         // event.preventDefault();
         if (event.keyCode == 13) {
-            console.log('hey hey ehey')
             var next_id = $('input[type=text]').index(this) + 1;
             $('input[type=text]:eq(' + next_id + ')').focus();
         }
@@ -174,13 +173,13 @@ function setUp() {
     // handle response of upload photos
     var upload_photos = uploadFiles( $SCRIPT_ROOT + '/upload_photos',
         function (data, textStatus, jqXHR) {
-            alert('uploaded photos');
+            $('#mePhotos').append(data);
     });
 
     // handle response of upload profile pic
     var upload_profile_pic = uploadFiles( $SCRIPT_ROOT + '/upload_profile_pic',
         function (data, textStatus, jqXHR) {
-            alert('uploaded profile pic');
+            console.log('uploaded profile pic');
     });
 
     $('#profile_modal').on('change', '#file_photos', upload_photos);
@@ -206,6 +205,10 @@ function setUp() {
             cache: false,
             success: handler
         });
+    }
+
+    function postData (data, relative_url) {
+        $.post($SCRIPT_ROOT + relative_url, data);
     }
 
 
@@ -268,6 +271,8 @@ function setUp() {
             postForm('#form_meHead', '/aboutme/save/head');
             postForm('#form_meAbout', '/aboutme/save/about');
             postForm('#form_mePreferences', '/aboutme/save/preferences');
+            postData({'toremove': $('#mePhotos').data('toremove')}, '/aboutme/save/photos');
+            $('#brand').click();
             $('#profile_modal').modal('hide');
         }
     }
@@ -277,6 +282,21 @@ function setUp() {
         postForm('#form_meHead', '/aboutme/check/head', meHeadCheckHandler);
 
 
+    });
+
+    //---------------------- photos ----------------------------
+
+    // remove photo from dom and add filename to list to remove
+    $('#profile_modal').on('click', '.remove-photo', function() {
+
+        var filename = $(this).data('filename');
+        var list = $('#mePhotos').data('toremove');
+        if (list) {
+            $('#mePhotos').data('toremove', list + ' ' + filename);
+        } else {
+            $('#mePhotos').data('toremove', filename);
+        }
+        $(this).parent().parent().remove();
     });
 
 
@@ -357,16 +377,14 @@ function setUp() {
     // connect up hover overlays
     $('body').on('mouseenter','.overlay-parent',
         function(){
-            console.log('what up doc');
             $(this).find('.top-overlay').fadeIn(250);
             $(this).find('.bottom-overlay').fadeIn(250);
         }
     );
     $('body').on('mouseleave','.overlay-parent',
         function(){
-            console.log('whats down doc');
-            $(this).find('.top-overlay').fadeOut(250);
-            $(this).find('.bottom-overlay').fadeOut(250);
+            $(this).find('.top-overlay').fadeOut(10);
+            $(this).find('.bottom-overlay').fadeOut(10);
         }
     ); 
 
