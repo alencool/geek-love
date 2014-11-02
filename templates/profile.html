@@ -51,6 +51,15 @@
             <div class="container-fluid">
                  <div class="isotope">
                     <div class="columns col-md-4 col-sm-6 col-xs-12">
+
+                      {% if profile.quote %}
+
+                      <h5>Description</h5>
+                      <p>
+                        {{ profile.quote|safe }}
+                      </p>
+                      {% endif %}
+
                       {% if profile.height or profile.weight or profile.hair_colour  %}
 
                       <h5>Appearance</h5>

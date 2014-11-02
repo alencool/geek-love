@@ -1,8 +1,9 @@
 {% from 'macros.html' import input, select %}
-<div class="col-lg-4 col-md-4 col-sm-6 col-xs-7">
-    
     <form class="form-horizontal" role="form" id="form_meHead">
     <fieldset>
+<div class="col-lg-4 col-md-4 col-sm-6 col-xs-7">
+    
+
       
 
           {% set f = me %}
@@ -15,14 +16,22 @@
           {{ select('gender', 'Gender', error.gender, values=['Male', 'Female'], selected=f.gender, placeholder='I am...') }}
 
 
-    </fieldset>
-    </form>
+
+
 
 
 </div>
+<div class="col-lg-8 col-md-8 col-sm-6 col-xs-5">
+
+  <textarea class="col-xs-12" id="quote" name="quote"
+  placeholder="Describe yourself..." value='{{ f.quote }}' rows="3">
+  {{ f.quote }}
+  </textarea><br>
+  <div class="col-xs-12">
+  <smal> You may use &lt;b&gt;<b>bold</b>&lt;/b&gt;, &lt;i&gt;<i>italic</i>&lt;/i&gt; and &lt;u&gt;<u>underline</u>&lt;/u&gt;,  tags. </smal>
+  </div>
+</div>
 
 
-
-
-
-
+    </fieldset>
+    </form>

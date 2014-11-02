@@ -686,8 +686,6 @@ def profile_img(username):
     os.chdir(prevdir)
     return app.send_static_file(path)
 
-# quote
-#     <i>Italic</i>, <b>Bold</b> and <u>Underline</u> supported.
 
 # Return inner html for profile
 @app.route('/profile/<username>')
@@ -895,7 +893,6 @@ def aboutme_check(kind):
 
         birthday = f['birthday']
         validate_birthday(birthday, error)
-
         return jsonify(html=render_template('meHead.html', me=g.user, error=error),
                        error=len(error)>0)
 
@@ -951,8 +948,14 @@ def aboutme_save(kind):
     if kind == 'skeleton':
         pass
     elif kind == 'head':
+        quote = f['quote']
+        # replace left
+        quote = re.sub(r'(<(?!\/?[biu]>))','&lt;', quote)
+        # replace right
+        quote = re.sub(r'(?<!<\/[biu])(?<!<[biu])>','&gt;', quote)
         data = {
-            'name'               : f['name'], #'quote'              : f['quote'], 
+            'name'               : f['name'], 
+            'quote'              : quote, 
             'gender'             : f['gender'], 
             'birthday'           : f['birthday'] }
         update_user(user, data)
